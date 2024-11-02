@@ -155,23 +155,9 @@ if [ -f '/etc/dstar-radio.mmdvmhost' ]; then
     ControllerType="MMDVM"
     ModemType=$( grep Hardware /etc/dstar-radio.mmdvmhost | sed 's/Hardware=//' )
     if ! grep -w 'ModemType' /etc/pistar-release > /dev/null; then
-	sed -i "/ModemMode = /a ModemType = ${ModemType}" /etc/pistar-release
+        sed -i "/ModemMode = /a ModemType = ${ModemType}" /etc/pistar-release
     else
-	sed -i "/ModemType =/c ModemType = ${ModemType}" /etc/pistar-release
-    fi
-    if ! grep -w 'ControllerType' /etc/pistar-release > /dev/null; then
-        sed -i "/ModemType /a ControllerType = ${ControllerType}" /etc/pistar-release
-    else
-        sed -i "/ControllerType =/c ControllerType = ${ControllerType}" /etc/pistar-release
-    fi
-fi
-if [ -f '/etc/dstar-radio.dstarrepeater' ]; then
-    ControllerType="DSTARrepeater"
-    ModemType=$( grep Hardware /etc/dstar-radio.mmdvmhost | sed 's/Hardware=//' )
-    if ! grep -w 'ModemType' /etc/pistar-release > /dev/null; then
-	sed -i "/ModemMode = /a ModemType = ${ModemType}" /etc/pistar-release
-    else
-	sed -i "/ModemType =/c ModemType = ${ModemType}" /etc/pistar-release
+        sed -i "/ModemType =/c ModemType = ${ModemType}" /etc/pistar-release
     fi
     if ! grep -w 'ControllerType' /etc/pistar-release > /dev/null; then
         sed -i "/ModemType /a ControllerType = ${ControllerType}" /etc/pistar-release
@@ -199,6 +185,7 @@ while [ -z "$LOG_LINE" ] && [ $attempts -lt $max_attempts ]; do
     fi
     attempts=$((attempts + 1))
 done
+
 # Extract the modem name and version directly from the description
 # Handle DVMEGA format
 if [[ "$LOG_LINE" =~ description:\ (DVMEGA\ ([^ ]+)) ]]; then
@@ -219,12 +206,24 @@ elif [[ "$LOG_LINE" =~ description:\ (OpenGD77(_HS| Hotspot))\ v?([0-9.]+) ]]; t
 elif [[ "$LOG_LINE" =~ description:\ ([^ ]+)-v?([0-9.]+) ]]; then
     MODEM_FIRMWARE="${BASH_REMATCH[1]}-v.${BASH_REMATCH[2]}"
 fi
+
+# Fallback to ModemType if MODEM_FIRMWARE is empty
+if [ -z "$MODEM_FIRMWARE" ]; then
+    MODEM_FIRMWARE="${ModemType}"
+fi
+
 MODEM_TCXO_FREQ=""
 # TCXO frequency
 if [[ "$LOG_LINE" == *"MHz"* ]]; then
     MODEM_TCXO_FREQ=$(echo "$LOG_LINE" | grep -oP '\d{2,3}\.\d{3,4}\s?MHz')
     MODEM_TCXO_FREQ=$(echo "$MODEM_TCXO_FREQ" | sed 's/MHz/ MHz/')
 fi
+
+# Fallback if  is empty
+if [ -z "$MODEM_TCXO_FREQ" ]; then
+    MODEM_TCXO_FREQ="Updating. Please wait."
+fi
+
 # Update the release file
 if ! grep -w 'ModemFW' /etc/pistar-release > /dev/null; then
     sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" /etc/pistar-release
