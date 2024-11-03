@@ -201,7 +201,6 @@ perform_update() {
     echo -e "  ${TICK} Done!\n"
 
     echo -e "${BULL} Updating WPSD Utilities and Support Programs..."
-    wpsd-slipstream-tasks > /dev/null 2>&1
     git_update /usr/local/sbin
     echo ""
 
