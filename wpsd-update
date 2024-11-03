@@ -126,10 +126,7 @@ git_update() {
 		    env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-Update (Manual-Update) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git pull -q origin master > /dev/null 2>&1
 		    echo -e "  ${TICK} Updates installed!"
 		    if [[ $(git_checkUpdateRequired ${gitFolder}) -gt 0 ]]; then
-			echo -e "  ${NOTE} Forcing update..."
-			if [ -f ${gitFolder}/pistar-upnp.service ]; then
-			    rm -f ${gitFolder}/pistar-upnp.service
-			fi
+			#echo -e "  ${NOTE} Forcing update..."
 			env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-Update (Manual-Update) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git reset --hard origin/master
 			env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-Update (Manual-Update) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git pull -q origin master > /dev/null 2>&1
 		    fi
@@ -153,9 +150,6 @@ git_update() {
         fi
 	# Re-check that the updates are now good
 	if [[ $(git_checkUpdateRequired ${gitFolder}) -gt 0 ]]; then
-	    if [[ ${gitFolder} == "/usr/local/sbin" ]]; then
-		rm -rf ${gitFolder}/pistar-upnp.service
-	    fi
 	    # Updates were not successful, reverting to original files...
 	    # WPSD has more than one branch. So depending on what WPSD branch the user has installed, pull that branch.
 	    if [[ ${gitFolder} == "/var/www/dashboard" ]]; then
