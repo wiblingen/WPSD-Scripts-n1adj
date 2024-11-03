@@ -52,14 +52,14 @@ spinner() {
 
 # common vars
 osName=$( /usr/bin/lsb_release -cs )
-CALL=$( grep "^Callsign = " /etc/pistar-release | awk -F' = ' '{print $2}' )
+CALL=$( grep "^Callsign = " /etc/WPSD-release | awk -F' = ' '{print $2}' )
 OS_VER=$( cat /etc/debian_version | sed 's/\..*//')
 SUPPORTING_FILES_REPO="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/supporting-files"
 CONN_CHECK_URI="https://wpsd-swd.w0chp.net/api/v1/repos/WPSD-SWD/WPSD-Scripts/branches"
 hostFileURL="https://hostfiles.w0chp.net"
 gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
 dashVer=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )
-uuidStr=$(egrep 'UUID' /etc/pistar-release | awk {'print $3'})
+uuidStr=$(egrep 'UUID' /etc/WPSD-release | awk {'print $3'})
 uaStr="Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]"
 uaStrSF="WPSD-SuppFiles Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]"
 armbian_env_file="/boot/armbianEnv.txt"

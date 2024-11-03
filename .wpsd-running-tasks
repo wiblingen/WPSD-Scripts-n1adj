@@ -18,17 +18,14 @@ fi
 # run any slipstream tasks
 pkill .wpsd-slipstream-tasks > /dev/null 2>&1
 
-# update local sys cache
-/usr/local/sbin/.wpsd-sys-cache
-
 # migrate config update notice
 if grep -q ConfUpdReqd /etc/mmdvmhost ; then
-    grep ConfUpdReqd /etc/mmdvmhost | sed 's/=/ = /' >> /etc/pistar-release
+    grep ConfUpdReqd /etc/mmdvmhost | sed 's/=/ = /' >> /etc/WPSD-release
     sed -i '/^\[WPSD\]/d' /etc/mmdvmhost
     sed -i '/^ConfUpdReqd/d' /etc/mmdvmhost
 else
-    if ! grep -q ConfUpdReqd /etc/pistar-release ; then
-	echo "ConfUpdReqd = " >> /etc/pistar-release
+    if ! grep -q ConfUpdReqd /etc/WPSD-release ; then
+	echo "ConfUpdReqd = " >> /etc/WPSD-release
     fi
 fi
 
@@ -63,12 +60,11 @@ fi
 
 /usr/local/sbin/.wpsd-slipstream-tasks
 
-# update local sys cache
-/usr/local/sbin/.wpsd-sys-cache
-
 # ensure hostfiles are updated more regularly
 /usr/local/sbin/wpsd-hostfile-update
 
 # Generate /etc/motd
 bash /usr/local/sbin/motdgen
 
+# update local sys cache
+/usr/local/sbin/.wpsd-sys-cache

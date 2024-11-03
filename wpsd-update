@@ -363,9 +363,9 @@ perform_update() {
     chown -R mmdvm:mmdvm /var/log/pi-star > /dev/null 2>&1
     chmod 775 /var/log/pi-star > /dev/null 2>&1
 
-    bash /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
-
     systemctl restart wpsd-running-tasks.service >/dev/null 2>&1
+
+    bash /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 
     echo -e "  ${TICK} Done!" # maint. complete
 

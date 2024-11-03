@@ -8,7 +8,7 @@ fi
 
 source /usr/local/sbin/.wpsd-common-funcs
 
-CALL=$( grep "Callsign" /etc/pistar-release | awk '{print $3}' )
+CALL=$( grep "Callsign" /etc/WPSD-release | awk '{print $3}' )
 
 function DisableFirewall() {
     rm /usr/local/sbin/pistar-firewall

@@ -3,7 +3,7 @@
 ### Cache HW and other pertinent information for a file used across the software & session storage
 
 # release/config init:
-INI_FILE="/etc/pistar-release"
+INI_FILE="/etc/WPSD-release"
 if [ ! -f "$INI_FILE" ] ; then
     touch "INI_FILE"
 fi
@@ -65,7 +65,7 @@ check_key_existence() {
 
 if [ ! -f "$INI_FILE" ] || [ "$(check_key_existence)" -eq 1 ] || [ "$(check_empty_keys)" -eq 1 ]; then
     cat > "$INI_FILE" <<EOF
-[Pi-Star]
+[WPSD]
 ircddbgateway = 
 MMDVMHost = 
 kernel = 
@@ -92,50 +92,50 @@ sed -i "/Hardware/c Hardware = ${HW_var}" "$INI_FILE"
 
 # bins are sometimes built in a batch...use MMDVMHost ver as Dstar bin git/date vers...
 getVer=$( MMDVMHost -v | cut -d' ' -f 3- )
-sed -i "/^ircddbgateway.*/c ircddbgateway = ${getVer}" /etc/pistar-release
-sed -i "/MMDVMHost/c MMDVMHost = ${getVer}" /etc/pistar-release
+sed -i "/^ircddbgateway.*/c ircddbgateway = ${getVer}" /etc/WPSD-release
+sed -i "/MMDVMHost/c MMDVMHost = ${getVer}" /etc/WPSD-release
 
 # proc count
 countProcs=$(grep -c ^processor /proc/cpuinfo)
-if ! grep -w 'ProcNum' /etc/pistar-release > /dev/null; then
-    sed -i "/Hardware = /a ProcNum = ${countProcs}" /etc/pistar-release
+if ! grep -w 'ProcNum' /etc/WPSD-release > /dev/null; then
+    sed -i "/Hardware = /a ProcNum = ${countProcs}" /etc/WPSD-release
 else
-    sed -i "/ProcNum/c ProcNum = ${countProcs}" /etc/pistar-release
+    sed -i "/ProcNum/c ProcNum = ${countProcs}" /etc/WPSD-release
 fi
 
 # active net iface
 activeIface=$(route | head -3 | tail -1 | awk '{print $8}')
-if ! grep -w 'iface' /etc/pistar-release > /dev/null; then
-    sed -i "/Hardware = /a iface = ${activeIface}" /etc/pistar-release
+if ! grep -w 'iface' /etc/WPSD-release > /dev/null; then
+    sed -i "/Hardware = /a iface = ${activeIface}" /etc/WPSD-release
 else
-    sed -i "/iface/c iface = ${activeIface}" /etc/pistar-release
+    sed -i "/iface/c iface = ${activeIface}" /etc/WPSD-release
 fi
 
 # kernel ver.
 KernelVer=`uname -r`
-sed -i "/kernel/c kernel = ${KernelVer}" /etc/pistar-release
+sed -i "/kernel/c kernel = ${KernelVer}" /etc/WPSD-release
 
-if ! grep -w 'Platform' /etc/pistar-release > /dev/null; then
-    sed -i "/Hardware = /a Platform = $(eval "$PlatDet")" /etc/pistar-release
+if ! grep -w 'Platform' /etc/WPSD-release > /dev/null; then
+    sed -i "/Hardware = /a Platform = $(eval "$PlatDet")" /etc/WPSD-release
 else
-    sed -i "/Platform/c Platform = $(eval "$PlatDet")" /etc/pistar-release
+    sed -i "/Platform/c Platform = $(eval "$PlatDet")" /etc/WPSD-release
 fi
 
 # uuid
 GU=$( cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2 )
-sed -i "/UUID =/c\\UUID = ${GU}" /etc/pistar-release
+sed -i "/UUID =/c\\UUID = ${GU}" /etc/WPSD-release
 
-# migrate callsign info to last line of /etc/pistar-release
+# migrate callsign info to last line of /etc/WPSD-release
 CALL=$( grep -oP '^Callsign=\K.*' /etc/mmdvmhost | head -n 1 )
-if ! grep -w 'Callsign' /etc/pistar-release > /dev/null; then
-    echo "Callsign = ${CALL}" >> /etc/pistar-release
+if ! grep -w 'Callsign' /etc/WPSD-release > /dev/null; then
+    echo "Callsign = ${CALL}" >> /etc/WPSD-release
 else
-    sed -i "/Callsign =/c Callsign = ${CALL}" /etc/pistar-release
+    sed -i "/Callsign =/c Callsign = ${CALL}" /etc/WPSD-release
 fi
-callsign_count=$(grep -c "Callsign =" /etc/pistar-release)
+callsign_count=$(grep -c "Callsign =" /etc/WPSD-release)
 if [ "$callsign_count" -gt 1 ]; then
-  sed -i '/^Callsign =/d' /etc/pistar-release
-  echo "Callsign = ${CALL}" >> /etc/pistar-release
+  sed -i '/^Callsign =/d' /etc/WPSD-release
+  echo "Callsign = ${CALL}" >> /etc/WPSD-release
 fi
 
 # Cache Modem Mode
@@ -144,25 +144,25 @@ if grep -q 'Duplex=1' /etc/mmdvmhost ; then
 else
     ModemMode="Simplex"
 fi
-if ! grep -w 'ModemMode' /etc/pistar-release > /dev/null; then
-    sed -i "/iface = /a ModemMode = ${ModemMode}" /etc/pistar-release
+if ! grep -w 'ModemMode' /etc/WPSD-release > /dev/null; then
+    sed -i "/iface = /a ModemMode = ${ModemMode}" /etc/WPSD-release
 else
-    sed -i "/ModemMode =/c ModemMode = ${ModemMode}" /etc/pistar-release
+    sed -i "/ModemMode =/c ModemMode = ${ModemMode}" /etc/WPSD-release
 fi
 
 # Cache modem and controller types
 if [ -f '/etc/dstar-radio.mmdvmhost' ]; then
     ControllerType="MMDVM"
     ModemType=$( grep Hardware /etc/dstar-radio.mmdvmhost | sed 's/Hardware=//' )
-    if ! grep -w 'ModemType' /etc/pistar-release > /dev/null; then
-        sed -i "/ModemMode = /a ModemType = ${ModemType}" /etc/pistar-release
+    if ! grep -w 'ModemType' /etc/WPSD-release > /dev/null; then
+        sed -i "/ModemMode = /a ModemType = ${ModemType}" /etc/WPSD-release
     else
-        sed -i "/ModemType =/c ModemType = ${ModemType}" /etc/pistar-release
+        sed -i "/ModemType =/c ModemType = ${ModemType}" /etc/WPSD-release
     fi
-    if ! grep -w 'ControllerType' /etc/pistar-release > /dev/null; then
-        sed -i "/ModemType /a ControllerType = ${ControllerType}" /etc/pistar-release
+    if ! grep -w 'ControllerType' /etc/WPSD-release > /dev/null; then
+        sed -i "/ModemType /a ControllerType = ${ControllerType}" /etc/WPSD-release
     else
-        sed -i "/ControllerType =/c ControllerType = ${ControllerType}" /etc/pistar-release
+        sed -i "/ControllerType =/c ControllerType = ${ControllerType}" /etc/WPSD-release
     fi
 fi
 
@@ -225,38 +225,38 @@ if [ -z "$MODEM_TCXO_FREQ" ]; then
 fi
 
 # Update the release file
-if ! grep -w 'ModemFW' /etc/pistar-release > /dev/null; then
-    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" /etc/pistar-release
+if ! grep -w 'ModemFW' /etc/WPSD-release > /dev/null; then
+    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" /etc/WPSD-release
 else
-    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" /etc/pistar-release
+    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" /etc/WPSD-release
 fi
-if ! grep -w 'TCXO' /etc/pistar-release > /dev/null; then
-    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" /etc/pistar-release
+if ! grep -w 'TCXO' /etc/WPSD-release > /dev/null; then
+    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" /etc/WPSD-release
 else
-    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" /etc/pistar-release
+    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" /etc/WPSD-release
 fi
 
-# add / update WPSD version hash to /etc/pistar-release
+# add / update WPSD version hash to /etc/WPSD-release
 gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
 WPSDver=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )
-if ! grep -w 'WPSD_Ver' /etc/pistar-release > /dev/null; then
-    sed -i "/Callsign =/a WPSD_Ver = ${WPSDver}" /etc/pistar-release
+if ! grep -w 'WPSD_Ver' /etc/WPSD-release > /dev/null; then
+    sed -i "/Callsign =/a WPSD_Ver = ${WPSDver}" /etc/WPSD-release
 else
-    sed -i "/WPSD_Ver/c WPSD_Ver = ${WPSDver}" /etc/pistar-release
+    sed -i "/WPSD_Ver/c WPSD_Ver = ${WPSDver}" /etc/WPSD-release
 fi
 
 # cleanup legacy entries
-if [ $(grep -c 'MMDVMHost' /etc/pistar-release) -gt 2 ]; then
-    sed -i '/MMDVM/d' /etc/pistar-release
-    sed -i "/Version = /a MMDVMHost = " /etc/pistar-release
+if [ $(grep -c 'MMDVMHost' /etc/WPSD-release) -gt 2 ]; then
+    sed -i '/MMDVM/d' /etc/WPSD-release
+    sed -i "/Version = /a MMDVMHost = " /etc/WPSD-release
 fi
-if grep -q "OrangePiZero" /etc/pistar-release; then
-    sed -i 's/OrangePiZero/OrangePi/g' /etc/pistar-release 
+if grep -q "OrangePiZero" /etc/WPSD-release; then
+    sed -i 's/OrangePiZero/OrangePi/g' /etc/WPSD-release 
 fi
-if grep -q "Hardware = RPi" /etc/pistar-release; then
-    sed -i 's/Hardware = RPi/Hardware = RaspberryPi/g' /etc/pistar-release 
+if grep -q "Hardware = RPi" /etc/WPSD-release; then
+    sed -i 's/Hardware = RPi/Hardware = RaspberryPi/g' /etc/WPSD-release 
 fi
 
 # cleanup last line..
-#sed -i '${/^$/d}' /etc/pistar-release
+#sed -i '${/^$/d}' /etc/WPSD-release
 

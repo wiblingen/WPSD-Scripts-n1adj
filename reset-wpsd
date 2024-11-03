@@ -31,7 +31,7 @@ sudo systemctl unmask cron
 sudo systemctl enable cron
 sudo systemctl start cron
 
-sudo rm -rf /etc/pistar-release ; sudo touch /etc/pistar-release
+sudo rm -rf /etc/WPSD-release ; sudo touch /etc/WPSD-release
 
 sudo wpsd-services start
 

@@ -18,7 +18,7 @@ fi
 
 source /usr/local/sbin/.wpsd-common-funcs
 OS_VER=$( cat /etc/debian_version | sed 's/\..*//')
-hardware=$(grep -i hardware /etc/pistar-release | awk -F "= " '{print $2}')
+hardware=$(grep -i hardware /etc/WPSD-release | awk -F "= " '{print $2}')
 
 MMDVM_HS_VERSION=$(awk -F "=" '/mmdvm_hs/ {print $2}' /usr/local/bin/firmware/versions.txt)
 RPT_VERSION=$(awk -F "=" '/rpt/ {print $2}' /usr/local/bin/firmware/versions.txt)
