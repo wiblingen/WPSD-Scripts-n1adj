@@ -58,13 +58,12 @@ if compgen -G "/tmp/Callsign_Name.txt*" > /dev/null; then
     fi
 fi
 
+/usr/local/sbin/.wpsd-sys-cache
 /usr/local/sbin/.wpsd-slipstream-tasks
 
 # ensure hostfiles are updated more regularly
-/usr/local/sbin/wpsd-hostfile-update
+/usr/local/sbin/wpsd-hostfile-update &
 
 # Generate /etc/motd
 bash /usr/local/sbin/motdgen
 
-# update local sys cache
-/usr/local/sbin/.wpsd-sys-cache
