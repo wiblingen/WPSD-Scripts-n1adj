@@ -1,10 +1,10 @@
 #!/bin/bash
-#########################################################
-#                                                       #
-#              Host, TG, and ID DB files Updater        #
-#                       by W0CHP                        #
-#                                                       #
-#########################################################
+#######################################################
+#                                                     #
+#            Host, TG, and ID DB files Updater        #
+#                     by W0CHP                        #
+#                                                     #
+#######################################################
 
 # Check if we are root
 if [ "$(id -u)" != "0" ];then
@@ -65,18 +65,6 @@ STRIPPED=/usr/local/etc/tmp/stripped.csv
 curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
 
 tar jxf /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -C /usr/local/etc/tmp/
-
-for file in "$DIR"*; do
-  # Skip the excluded file
-  if [[ $(basename "$file") == "DExtra_NoXRF_Hosts.txt" ]]; then
-    continue
-  fi
-  # Check if the file is empty
-  if [[ ! -s "$file" ]]; then
-    echo "Empty file found: $file - Bailing until next update"
-    exit 1
-  fi
-done
 
 if [ -f /etc/hostfiles.nodextra ]; then
   # Move XRFs to DPlus Protocol
