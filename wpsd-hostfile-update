@@ -18,7 +18,7 @@ source /usr/local/sbin/.wpsd-common-funcs
 if [[ ${FORCE} -ne 1 ]] ; then # please be thoughtful here. This env. var. is called by a few places in the admin pages.
     if [  -f '/var/run/hostfiles-up' ] && [ "$(( $(date +"%s") - $(stat -c "%Y" "/var/run/hostfiles-up") ))" -lt "28880" ]; then
 	echo "Hostfles are less than 8 hours old. Not updating."
-	echo "To force an update, run 'sudo env FORCE=1 $(basename "$0")'"
+	echo "To force an update, run 'sudo FORCE=1 $(basename "$0")'"
 	exit 1
     fi
 fi
@@ -64,6 +64,18 @@ STRIPPED=/usr/local/etc/tmp/stripped.csv
 curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
 
 tar jxf /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -C /usr/local/etc/tmp/
+
+for file in "$DIR"*; do
+  # Skip the excluded file
+  if [[ $(basename "$file") == "DExtra_NoXRF_Hosts.txt" ]]; then
+    continue
+  fi
+  # Check if the file is empty
+  if [[ ! -s "$file" ]]; then
+    echo "Empty file found: $file - Bailing until next update"
+    exit 1
+  fi
+done
 
 if [ -f /etc/hostfiles.nodextra ]; then
   # Move XRFs to DPlus Protocol
