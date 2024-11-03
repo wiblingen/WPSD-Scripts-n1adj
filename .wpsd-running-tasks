@@ -29,7 +29,6 @@ else
     fi
 fi
 
-/usr/local/sbin/.wpsd-slipstream-tasks
 /usr/local/sbin/.wpsd-sys-cache
 
 # Shrink NginX error log to stop it getting out of hand
