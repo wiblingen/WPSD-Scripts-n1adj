@@ -123,8 +123,8 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
 
     echo -e "\nPerforming maint. tasks..."
     # if css does not exist, install default one
-    if [ ! -f "/etc/pistar-css.ini" ] ; then
-	curl -Ls -A "WPSD-SuppFiles (WPSD-Daily-Nightly-Tasks) ${uaStrSF}" $SUPPORTING_FILES_REPO/pistar-css-W0CHP.ini -o /etc/pistar-css.ini
+    if [ ! -f "/etc/WPSD-css.ini" ] ; then
+	curl -Ls -A "WPSD-SuppFiles (WPSD-Daily-Nightly-Tasks) ${uaStrSF}" $SUPPORTING_FILES_REPO/WPSD-CSS.ini -o /etc/wpsd-css.ini
     fi
 
     # setup our own native NextionDriver service...

@@ -342,8 +342,8 @@ perform_update() {
     fi
 
     # if css does not exist, install default one
-    if [ ! -f "/etc/pistar-css.ini" ] ; then
-	curl -Ls -A "${uaStrSF}" $SUPPORTING_FILES_REPO/pistar-css-W0CHP.ini -o /etc/pistar-css.ini
+    if [ ! -f "/etc/wpsd-css.ini" ] ; then
+	curl -Ls -A "${uaStrSF}" $SUPPORTING_FILES_REPO/WPSD-CSS.ini -o /etc/wpsd-css.ini
     fi
 
     # Get and cache latest WPSD Web Code version from remote Git repo:
