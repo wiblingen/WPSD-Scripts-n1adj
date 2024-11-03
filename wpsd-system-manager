@@ -28,24 +28,6 @@ function EnableFirewall() {
     fi
 }
 
-function DisableCron() {
-    systemctl stop cron.service > /dev/null 2>&1
-    systemctl disable cron.service > /dev/null 2>&1
-    systemctl mask cron.service > /dev/null 2>&1
-    if [ -t 1 ]; then
-        echo "Cron Disabled"
-    fi
-}
-
-function EnableCron() {
-    systemctl unmask cron.service > /dev/null 2>&1
-    systemctl enable cron.service > /dev/null 2>&1
-    systemctl start cron.service > /dev/null 2>&1
-    if [ -t 1 ]; then
-        echo "Cron Enabled"
-    fi
-}
-
 function DisableRemoteRF() {
     sed -i '/enabled=/c enabled=false' /etc/pistar-remote
     systemctl stop pistar-remote.timer > /dev/null 2>&1
@@ -103,8 +85,6 @@ function DisplayHelp() {
     echo "  -h,   --help                       Display this help text."
     echo "  -dfw  --disable-firewall           Disable OS firewall and allow all traffic"
     echo "  -efw  --enable-firewall            Enable OS firewall &  allow only digital voice traffic"
-    echo "  -dc,  --disable-cron               Stop & disable the Cron daemon"
-    echo "  -ec,  --enable-cron                Start & enable the Cron daemon"
     echo "  -drf  --disable-rf-commands        Disable Remote RF Commands"
     echo "  -erf  --enable-rf-commands         Enable Remote RF Commands"
     echo "  -dsw  --disable-services-watchdog  Disable WPSD Services Watchdog"
@@ -130,16 +110,6 @@ while [[ $# -gt 0 ]]; do
 
     "-efw" | "--enable-firewall")
         EnableFirewall
-        shift
-        ;;
-
-    "-dc" | "--disable-cron")
-        DisableCron
-        shift
-        ;;
-
-    "-ec" | "--enable-cron")
-        EnableCron
         shift
         ;;
 
