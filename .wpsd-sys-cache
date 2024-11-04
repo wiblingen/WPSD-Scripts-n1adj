@@ -264,4 +264,6 @@ fi
 # cleanup last line..
 #sed -i '${/^$/d}' "$TMP_INI_FILE"
 
-cp "$TMP_INI_FILE" "$INI_FILE"
+if ! cmp -s "$TMP_INI_FILE" "$INI_FILE" ; then
+    cp "$TMP_INI_FILE" "$INI_FILE"
+fi
