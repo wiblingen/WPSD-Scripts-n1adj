@@ -8,9 +8,9 @@ if [ ! -f "$INI_FILE" ] ; then
     touch "$INI_FILE"
 fi
 TMP_INI_FILE="/tmp/.WPSD-release"
-if [ ! -f "$INI_FILE" ] ; then
-    cp "$INI_FILE" "$TMP_INI_FILE"
-fi
+#if [ ! -f "$INI_FILE" ] ; then
+#    cp "$INI_FILE" "$TMP_INI_FILE"
+#fi
 
 PlatDet="/usr/local/sbin/.wpsd-platform-detect"
 # Function to perform the mappings
