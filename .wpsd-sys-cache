@@ -92,50 +92,50 @@ sed -i "/Hardware/c Hardware = ${HW_var}" "$INI_FILE"
 
 # bins are sometimes built in a batch...use MMDVMHost ver as Dstar bin git/date vers...
 getVer=$( MMDVMHost -v | cut -d' ' -f 3- )
-sed -i "/^ircddbgateway.*/c ircddbgateway = ${getVer}" /etc/WPSD-release
-sed -i "/MMDVMHost/c MMDVMHost = ${getVer}" /etc/WPSD-release
+sed -i "/^ircddbgateway.*/c ircddbgateway = ${getVer}" "$INI_FILE"
+sed -i "/MMDVMHost/c MMDVMHost = ${getVer}" "$INI_FILE"
 
 # proc count
 countProcs=$(grep -c ^processor /proc/cpuinfo)
-if ! grep -w 'ProcNum' /etc/WPSD-release > /dev/null; then
-    sed -i "/Hardware = /a ProcNum = ${countProcs}" /etc/WPSD-release
+if ! grep -w 'ProcNum' "$INI_FILE" > /dev/null; then
+    sed -i "/Hardware = /a ProcNum = ${countProcs}" "$INI_FILE"
 else
-    sed -i "/ProcNum/c ProcNum = ${countProcs}" /etc/WPSD-release
+    sed -i "/ProcNum/c ProcNum = ${countProcs}" "$INI_FILE"
 fi
 
 # active net iface
 activeIface=$(route | head -3 | tail -1 | awk '{print $8}')
-if ! grep -w 'iface' /etc/WPSD-release > /dev/null; then
-    sed -i "/Hardware = /a iface = ${activeIface}" /etc/WPSD-release
+if ! grep -w 'iface' "$INI_FILE" > /dev/null; then
+    sed -i "/Hardware = /a iface = ${activeIface}" "$INI_FILE"
 else
-    sed -i "/iface/c iface = ${activeIface}" /etc/WPSD-release
+    sed -i "/iface/c iface = ${activeIface}" "$INI_FILE"
 fi
 
 # kernel ver.
 KernelVer=`uname -r`
-sed -i "/kernel/c kernel = ${KernelVer}" /etc/WPSD-release
+sed -i "/kernel/c kernel = ${KernelVer}" "$INI_FILE"
 
-if ! grep -w 'Platform' /etc/WPSD-release > /dev/null; then
-    sed -i "/Hardware = /a Platform = $(eval "$PlatDet")" /etc/WPSD-release
+if ! grep -w 'Platform' "$INI_FILE" > /dev/null; then
+    sed -i "/Hardware = /a Platform = $(eval "$PlatDet")" "$INI_FILE"
 else
-    sed -i "/Platform/c Platform = $(eval "$PlatDet")" /etc/WPSD-release
+    sed -i "/Platform/c Platform = $(eval "$PlatDet")" "$INI_FILE"
 fi
 
 # uuid
 GU=$( cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2 )
-sed -i "/UUID =/c\\UUID = ${GU}" /etc/WPSD-release
+sed -i "/UUID =/c\\UUID = ${GU}" "$INI_FILE"
 
-# migrate callsign info to last line of /etc/WPSD-release
+# migrate callsign info to last line of "$INI_FILE"
 CALL=$( grep -oP '^Callsign=\K.*' /etc/mmdvmhost | head -n 1 )
-if ! grep -w 'Callsign' /etc/WPSD-release > /dev/null; then
-    echo "Callsign = ${CALL}" >> /etc/WPSD-release
+if ! grep -w 'Callsign' "$INI_FILE" > /dev/null; then
+    echo "Callsign = ${CALL}" >> "$INI_FILE"
 else
-    sed -i "/Callsign =/c Callsign = ${CALL}" /etc/WPSD-release
+    sed -i "/Callsign =/c Callsign = ${CALL}" "$INI_FILE"
 fi
-callsign_count=$(grep -c "Callsign =" /etc/WPSD-release)
+callsign_count=$(grep -c "Callsign =" "$INI_FILE")
 if [ "$callsign_count" -gt 1 ]; then
-  sed -i '/^Callsign =/d' /etc/WPSD-release
-  echo "Callsign = ${CALL}" >> /etc/WPSD-release
+  sed -i '/^Callsign =/d' "$INI_FILE"
+  echo "Callsign = ${CALL}" >> "$INI_FILE"
 fi
 
 # Cache Modem Mode
@@ -144,25 +144,25 @@ if grep -q 'Duplex=1' /etc/mmdvmhost ; then
 else
     ModemMode="Simplex"
 fi
-if ! grep -w 'ModemMode' /etc/WPSD-release > /dev/null; then
-    sed -i "/iface = /a ModemMode = ${ModemMode}" /etc/WPSD-release
+if ! grep -w 'ModemMode' "$INI_FILE" > /dev/null; then
+    sed -i "/iface = /a ModemMode = ${ModemMode}" "$INI_FILE"
 else
-    sed -i "/ModemMode =/c ModemMode = ${ModemMode}" /etc/WPSD-release
+    sed -i "/ModemMode =/c ModemMode = ${ModemMode}" "$INI_FILE"
 fi
 
 # Cache modem and controller types
 if [ -f '/etc/dstar-radio.mmdvmhost' ]; then
     ControllerType="MMDVM"
     ModemType=$( grep Hardware /etc/dstar-radio.mmdvmhost | sed 's/Hardware=//' )
-    if ! grep -w 'ModemType' /etc/WPSD-release > /dev/null; then
-        sed -i "/ModemMode = /a ModemType = ${ModemType}" /etc/WPSD-release
+    if ! grep -w 'ModemType' "$INI_FILE" > /dev/null; then
+        sed -i "/ModemMode = /a ModemType = ${ModemType}" "$INI_FILE"
     else
-        sed -i "/ModemType =/c ModemType = ${ModemType}" /etc/WPSD-release
+        sed -i "/ModemType =/c ModemType = ${ModemType}" "$INI_FILE"
     fi
-    if ! grep -w 'ControllerType' /etc/WPSD-release > /dev/null; then
-        sed -i "/ModemType /a ControllerType = ${ControllerType}" /etc/WPSD-release
+    if ! grep -w 'ControllerType' "$INI_FILE" > /dev/null; then
+        sed -i "/ModemType /a ControllerType = ${ControllerType}" "$INI_FILE"
     else
-        sed -i "/ControllerType =/c ControllerType = ${ControllerType}" /etc/WPSD-release
+        sed -i "/ControllerType =/c ControllerType = ${ControllerType}" "$INI_FILE"
     fi
 fi
 
@@ -225,38 +225,38 @@ if [ -z "$MODEM_TCXO_FREQ" ]; then
 fi
 
 # Update the release file
-if ! grep -w 'ModemFW' /etc/WPSD-release > /dev/null; then
-    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" /etc/WPSD-release
+if ! grep -w 'ModemFW' "$INI_FILE" > /dev/null; then
+    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" "$INI_FILE"
 else
-    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" /etc/WPSD-release
+    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" "$INI_FILE"
 fi
-if ! grep -w 'TCXO' /etc/WPSD-release > /dev/null; then
-    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" /etc/WPSD-release
+if ! grep -w 'TCXO' "$INI_FILE" > /dev/null; then
+    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" "$INI_FILE"
 else
-    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" /etc/WPSD-release
+    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" "$INI_FILE"
 fi
 
-# add / update WPSD version hash to /etc/WPSD-release
+# add / update WPSD version hash to "$INI_FILE"
 gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
 WPSDver=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )
-if ! grep -w 'WPSD_Ver' /etc/WPSD-release > /dev/null; then
-    sed -i "/Callsign =/a WPSD_Ver = ${WPSDver}" /etc/WPSD-release
+if ! grep -w 'WPSD_Ver' "$INI_FILE" > /dev/null; then
+    sed -i "/Callsign =/a WPSD_Ver = ${WPSDver}" "$INI_FILE"
 else
-    sed -i "/WPSD_Ver/c WPSD_Ver = ${WPSDver}" /etc/WPSD-release
+    sed -i "/WPSD_Ver/c WPSD_Ver = ${WPSDver}" "$INI_FILE"
 fi
 
 # cleanup legacy entries
-if [ $(grep -c 'MMDVMHost' /etc/WPSD-release) -gt 2 ]; then
-    sed -i '/MMDVM/d' /etc/WPSD-release
-    sed -i "/Version = /a MMDVMHost = " /etc/WPSD-release
+if [ $(grep -c 'MMDVMHost' "$INI_FILE") -gt 2 ]; then
+    sed -i '/MMDVM/d' "$INI_FILE"
+    sed -i "/Version = /a MMDVMHost = " "$INI_FILE"
 fi
-if grep -q "OrangePiZero" /etc/WPSD-release; then
-    sed -i 's/OrangePiZero/OrangePi/g' /etc/WPSD-release 
+if grep -q "OrangePiZero" "$INI_FILE"; then
+    sed -i 's/OrangePiZero/OrangePi/g' "$INI_FILE" 
 fi
-if grep -q "Hardware = RPi" /etc/WPSD-release; then
-    sed -i 's/Hardware = RPi/Hardware = RaspberryPi/g' /etc/WPSD-release 
+if grep -q "Hardware = RPi" "$INI_FILE"; then
+    sed -i 's/Hardware = RPi/Hardware = RaspberryPi/g' "$INI_FILE" 
 fi
 
 # cleanup last line..
-#sed -i '${/^$/d}' /etc/WPSD-release
+#sed -i '${/^$/d}' "$INI_FILE"
 
