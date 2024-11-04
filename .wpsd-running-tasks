@@ -66,3 +66,4 @@ fi
 # Generate /etc/motd
 bash /usr/local/sbin/motdgen
 
+/usr/local/sbin/.wpsd-slipstream-tasks
