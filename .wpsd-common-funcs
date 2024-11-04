@@ -52,7 +52,7 @@ spinner() {
 
 # common vars
 osName=$( /usr/bin/lsb_release -cs )
-if [ -f /etc/WPSD-release ]; then
+if [ -f '/etc/WPSD-release' ]; then
     CALL=$( grep "^Callsign = " /etc/WPSD-release | awk -F' = ' '{print $2}' )
 else
     CALL=$( grep "^Callsign = " /etc/pistar-release | awk -F' = ' '{print $2}' )
