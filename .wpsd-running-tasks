@@ -60,8 +60,6 @@ if compgen -G "/tmp/Callsign_Name.txt*" > /dev/null; then
     fi
 fi
 
-/usr/local/sbin/.wpsd-slipstream-tasks
-
 # ensure hostfiles are updated more regularly
 /usr/local/sbin/wpsd-hostfile-update &
 
