@@ -394,7 +394,8 @@ perform_update() {
     /bin/sync
     /bin/sync
     /bin/sync
-    .wpsd-slipstream-tasks > /dev/null 2>&1  
+    /usr/local/sbin/.wpsd-slipstream-tasks > /dev/null 2>&1  
+
     if [ -t 1 ]; then # term. vs. web output...
 	echo -e "${COL_REG_CYAN}+-------------------------------------------+${COL_NC}"
 	echo -e "${COL_REG_CYAN}|                                           |${COL_NC}"
