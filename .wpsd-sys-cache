@@ -5,7 +5,11 @@
 # release/config init:
 INI_FILE="/etc/WPSD-release"
 if [ ! -f "$INI_FILE" ] ; then
-    touch "INI_FILE"
+    touch "$INI_FILE"
+fi
+TMP_INI_FILE="/tmp/.WPSD-release"
+if [ ! -f "$INI_FILE" ] ; then
+    cp "$INI_FILE" "$TMP_INI_FILE"
 fi
 
 PlatDet="/usr/local/sbin/.wpsd-platform-detect"
@@ -33,9 +37,9 @@ map_hardware() {
 check_empty_keys() {
     local empty_keys=0
 
-    if [ -f "$INI_FILE" ]; then
+    if [ -f "$TMP_INI_FILE" ]; then
         for key in ircddbgateway MMDVMHost kernel Hardware Platform iface ModemMode ModemType ModemFW TXCO ControllerType ProcNum UUID ConfUpdReqd CallLookupProvider Callsign WPSD_Ver; do
-            if ! grep -qE "^${key} = .+" "$INI_FILE"; then
+            if ! grep -qE "^${key} = .+" "$TMP_INI_FILE"; then
                 empty_keys=1
                 break
             fi
@@ -49,9 +53,9 @@ check_empty_keys() {
 check_key_existence() {
     local missing_keys=0
 
-    if [ -f "$INI_FILE" ]; then
+    if [ -f "$TMP_INI_FILE" ]; then
         for key in ircddbgateway MMDVMHost kernel Hardware Platform iface ModemMode ModemType ModemFW TCXO ControllerType ProcNum UUID ConfUpdReqd CallLookupProvider Callsign WPSD_Ver; do
-            if ! grep -qE "^${key} =" "$INI_FILE"; then
+            if ! grep -qE "^${key} =" "$TMP_INI_FILE"; then
                 missing_keys=1
                 break
             fi
@@ -63,8 +67,8 @@ check_key_existence() {
     echo "$missing_keys"
 }
 
-if [ ! -f "$INI_FILE" ] || [ "$(check_key_existence)" -eq 1 ] || [ "$(check_empty_keys)" -eq 1 ]; then
-    cat > "$INI_FILE" <<EOF
+if [ ! -f "$TMP_INI_FILE" ] || [ "$(check_key_existence)" -eq 1 ] || [ "$(check_empty_keys)" -eq 1 ]; then
+    cat > "$TMP_INI_FILE" <<EOF
 [WPSD]
 ircddbgateway = 
 MMDVMHost = 
@@ -88,54 +92,54 @@ fi
 
 # update HW key:
 HW_var=$(map_hardware "$(eval "$PlatDet")")
-sed -i "/Hardware/c Hardware = ${HW_var}" "$INI_FILE"
+sed -i "/Hardware/c Hardware = ${HW_var}" "$TMP_INI_FILE"
 
 # bins are sometimes built in a batch...use MMDVMHost ver as Dstar bin git/date vers...
 getVer=$( MMDVMHost -v | cut -d' ' -f 3- )
-sed -i "/^ircddbgateway.*/c ircddbgateway = ${getVer}" "$INI_FILE"
-sed -i "/MMDVMHost/c MMDVMHost = ${getVer}" "$INI_FILE"
+sed -i "/^ircddbgateway.*/c ircddbgateway = ${getVer}" "$TMP_INI_FILE"
+sed -i "/MMDVMHost/c MMDVMHost = ${getVer}" "$TMP_INI_FILE"
 
 # proc count
 countProcs=$(grep -c ^processor /proc/cpuinfo)
-if ! grep -w 'ProcNum' "$INI_FILE" > /dev/null; then
-    sed -i "/Hardware = /a ProcNum = ${countProcs}" "$INI_FILE"
+if ! grep -w 'ProcNum' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/Hardware = /a ProcNum = ${countProcs}" "$TMP_INI_FILE"
 else
-    sed -i "/ProcNum/c ProcNum = ${countProcs}" "$INI_FILE"
+    sed -i "/ProcNum/c ProcNum = ${countProcs}" "$TMP_INI_FILE"
 fi
 
 # active net iface
 activeIface=$(route | head -3 | tail -1 | awk '{print $8}')
-if ! grep -w 'iface' "$INI_FILE" > /dev/null; then
-    sed -i "/Hardware = /a iface = ${activeIface}" "$INI_FILE"
+if ! grep -w 'iface' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/Hardware = /a iface = ${activeIface}" "$TMP_INI_FILE"
 else
-    sed -i "/iface/c iface = ${activeIface}" "$INI_FILE"
+    sed -i "/iface/c iface = ${activeIface}" "$TMP_INI_FILE"
 fi
 
 # kernel ver.
 KernelVer=`uname -r`
-sed -i "/kernel/c kernel = ${KernelVer}" "$INI_FILE"
+sed -i "/kernel/c kernel = ${KernelVer}" "$TMP_INI_FILE"
 
-if ! grep -w 'Platform' "$INI_FILE" > /dev/null; then
-    sed -i "/Hardware = /a Platform = $(eval "$PlatDet")" "$INI_FILE"
+if ! grep -w 'Platform' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/Hardware = /a Platform = $(eval "$PlatDet")" "$TMP_INI_FILE"
 else
-    sed -i "/Platform/c Platform = $(eval "$PlatDet")" "$INI_FILE"
+    sed -i "/Platform/c Platform = $(eval "$PlatDet")" "$TMP_INI_FILE"
 fi
 
 # uuid
 GU=$( cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2 )
-sed -i "/UUID =/c\\UUID = ${GU}" "$INI_FILE"
+sed -i "/UUID =/c\\UUID = ${GU}" "$TMP_INI_FILE"
 
-# migrate callsign info to last line of "$INI_FILE"
+# migrate callsign info to last line of "$TMP_INI_FILE"
 CALL=$( grep -oP '^Callsign=\K.*' /etc/mmdvmhost | head -n 1 )
-if ! grep -w 'Callsign' "$INI_FILE" > /dev/null; then
-    echo "Callsign = ${CALL}" >> "$INI_FILE"
+if ! grep -w 'Callsign' "$TMP_INI_FILE" > /dev/null; then
+    echo "Callsign = ${CALL}" >> "$TMP_INI_FILE"
 else
-    sed -i "/Callsign =/c Callsign = ${CALL}" "$INI_FILE"
+    sed -i "/Callsign =/c Callsign = ${CALL}" "$TMP_INI_FILE"
 fi
-callsign_count=$(grep -c "Callsign =" "$INI_FILE")
+callsign_count=$(grep -c "Callsign =" "$TMP_INI_FILE")
 if [ "$callsign_count" -gt 1 ]; then
-  sed -i '/^Callsign =/d' "$INI_FILE"
-  echo "Callsign = ${CALL}" >> "$INI_FILE"
+  sed -i '/^Callsign =/d' "$TMP_INI_FILE"
+  echo "Callsign = ${CALL}" >> "$TMP_INI_FILE"
 fi
 
 # Cache Modem Mode
@@ -144,25 +148,25 @@ if grep -q 'Duplex=1' /etc/mmdvmhost ; then
 else
     ModemMode="Simplex"
 fi
-if ! grep -w 'ModemMode' "$INI_FILE" > /dev/null; then
-    sed -i "/iface = /a ModemMode = ${ModemMode}" "$INI_FILE"
+if ! grep -w 'ModemMode' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/iface = /a ModemMode = ${ModemMode}" "$TMP_INI_FILE"
 else
-    sed -i "/ModemMode =/c ModemMode = ${ModemMode}" "$INI_FILE"
+    sed -i "/ModemMode =/c ModemMode = ${ModemMode}" "$TMP_INI_FILE"
 fi
 
 # Cache modem and controller types
 if [ -f '/etc/dstar-radio.mmdvmhost' ]; then
     ControllerType="MMDVM"
     ModemType=$( grep Hardware /etc/dstar-radio.mmdvmhost | sed 's/Hardware=//' )
-    if ! grep -w 'ModemType' "$INI_FILE" > /dev/null; then
-        sed -i "/ModemMode = /a ModemType = ${ModemType}" "$INI_FILE"
+    if ! grep -w 'ModemType' "$TMP_INI_FILE" > /dev/null; then
+        sed -i "/ModemMode = /a ModemType = ${ModemType}" "$TMP_INI_FILE"
     else
-        sed -i "/ModemType =/c ModemType = ${ModemType}" "$INI_FILE"
+        sed -i "/ModemType =/c ModemType = ${ModemType}" "$TMP_INI_FILE"
     fi
-    if ! grep -w 'ControllerType' "$INI_FILE" > /dev/null; then
-        sed -i "/ModemType /a ControllerType = ${ControllerType}" "$INI_FILE"
+    if ! grep -w 'ControllerType' "$TMP_INI_FILE" > /dev/null; then
+        sed -i "/ModemType /a ControllerType = ${ControllerType}" "$TMP_INI_FILE"
     else
-        sed -i "/ControllerType =/c ControllerType = ${ControllerType}" "$INI_FILE"
+        sed -i "/ControllerType =/c ControllerType = ${ControllerType}" "$TMP_INI_FILE"
     fi
 fi
 
@@ -225,38 +229,39 @@ if [ -z "$MODEM_TCXO_FREQ" ]; then
 fi
 
 # Update the release file
-if ! grep -w 'ModemFW' "$INI_FILE" > /dev/null; then
-    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" "$INI_FILE"
+if ! grep -w 'ModemFW' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" "$TMP_INI_FILE"
 else
-    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" "$INI_FILE"
+    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" "$TMP_INI_FILE"
 fi
-if ! grep -w 'TCXO' "$INI_FILE" > /dev/null; then
-    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" "$INI_FILE"
+if ! grep -w 'TCXO' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" "$TMP_INI_FILE"
 else
-    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" "$INI_FILE"
+    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" "$TMP_INI_FILE"
 fi
 
-# add / update WPSD version hash to "$INI_FILE"
+# add / update WPSD version hash to "$TMP_INI_FILE"
 gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
 WPSDver=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )
-if ! grep -w 'WPSD_Ver' "$INI_FILE" > /dev/null; then
-    sed -i "/Callsign =/a WPSD_Ver = ${WPSDver}" "$INI_FILE"
+if ! grep -w 'WPSD_Ver' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/Callsign =/a WPSD_Ver = ${WPSDver}" "$TMP_INI_FILE"
 else
-    sed -i "/WPSD_Ver/c WPSD_Ver = ${WPSDver}" "$INI_FILE"
+    sed -i "/WPSD_Ver/c WPSD_Ver = ${WPSDver}" "$TMP_INI_FILE"
 fi
 
 # cleanup legacy entries
-if [ $(grep -c 'MMDVMHost' "$INI_FILE") -gt 2 ]; then
-    sed -i '/MMDVM/d' "$INI_FILE"
-    sed -i "/Version = /a MMDVMHost = " "$INI_FILE"
+if [ $(grep -c 'MMDVMHost' "$TMP_INI_FILE") -gt 2 ]; then
+    sed -i '/MMDVM/d' "$TMP_INI_FILE"
+    sed -i "/Version = /a MMDVMHost = " "$TMP_INI_FILE"
 fi
-if grep -q "OrangePiZero" "$INI_FILE"; then
-    sed -i 's/OrangePiZero/OrangePi/g' "$INI_FILE" 
+if grep -q "OrangePiZero" "$TMP_INI_FILE"; then
+    sed -i 's/OrangePiZero/OrangePi/g' "$TMP_INI_FILE" 
 fi
-if grep -q "Hardware = RPi" "$INI_FILE"; then
-    sed -i 's/Hardware = RPi/Hardware = RaspberryPi/g' "$INI_FILE" 
+if grep -q "Hardware = RPi" "$TMP_INI_FILE"; then
+    sed -i 's/Hardware = RPi/Hardware = RaspberryPi/g' "$TMP_INI_FILE" 
 fi
 
 # cleanup last line..
-#sed -i '${/^$/d}' "$INI_FILE"
+#sed -i '${/^$/d}' "$TMP_INI_FILE"
 
+cp "$TMP_INI_FILE" "$INI_FILE"
