@@ -2,15 +2,8 @@
 
 ### Cache HW and other pertinent information for a file used across the software & session storage
 
-# release/config init:
 INI_FILE="/etc/WPSD-release"
-if [ ! -f "$INI_FILE" ] ; then
-    touch "$INI_FILE"
-fi
-TMP_INI_FILE="/tmp/.WPSD-release"
-#if [ ! -f "$INI_FILE" ] ; then
-#    cp "$INI_FILE" "$TMP_INI_FILE"
-#fi
+TMP_INI_FILE="/usr/local/etc/.WPSD-release"
 
 PlatDet="/usr/local/sbin/.wpsd-platform-detect"
 # Function to perform the mappings
@@ -177,8 +170,8 @@ LOG_SEARCH_STRING="MMDVM protocol version"
 MODEM_FIRMWARE=""
 # Loop until the search string is found in either today's or yesterday's log
 LOG_LINE=""
-attempts=0
-max_attempts=10
+attempts=1
+max_attempts=30
 while [ -z "$LOG_LINE" ] && [ $attempts -lt $max_attempts ]; do
     LOG_LINE=$(grep "$LOG_SEARCH_STRING" "$LOG_MMDVM_NOW" | tail -1)
     if [ -z "$LOG_LINE" ]; then
@@ -186,6 +179,10 @@ while [ -z "$LOG_LINE" ] && [ $attempts -lt $max_attempts ]; do
     fi
     if [ -z "$LOG_LINE" ]; then
         sleep 1
+    fi
+
+    if [ $attempts -ge $max_attempts ]; then
+	exit 1 # keep existing one until this runs again with success.
     fi
     attempts=$((attempts + 1))
 done
@@ -263,10 +260,6 @@ fi
 
 # cleanup last line..
 #sed -i '${/^$/d}' "$TMP_INI_FILE"
-
-if [ ! -f  "$TMP_INI_FILE" ] ; then
-    exit 1
-fi
 
 if ! cmp -s "$TMP_INI_FILE" "$INI_FILE" ; then
     cp "$TMP_INI_FILE" "$INI_FILE"
