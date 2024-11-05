@@ -43,6 +43,7 @@ fi
 if [ ! -d /usr/local/etc/tmp ]; then
     mkdir -p /usr/local/etc/tmp
 fi
+rm -rf /usr/local/etc/tmp/hostfile-checksums
 
 curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
 
