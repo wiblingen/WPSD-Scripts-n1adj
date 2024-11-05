@@ -413,7 +413,7 @@ if [ -t 1 ]; then
     # run via terminal, only output to screen
     export FORCE_COLOR=1
     term_banner
-    perform_update "$@"
+    perform_update "$0" "$@"
 else
     # if not run via terminal, log everything into a log file
      perform_update >> /var/log/pi-star/WPSD-update.log 2>&1
