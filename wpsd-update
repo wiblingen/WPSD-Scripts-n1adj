@@ -359,7 +359,7 @@ perform_update() {
 
     systemctl restart wpsd-running-tasks.service >/dev/null 2>&1
 
-    bash /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
+    /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 
     echo -e "  ${TICK} Done!" # maint. complete
 
@@ -394,7 +394,6 @@ perform_update() {
     /bin/sync
     /bin/sync
     /bin/sync
-    /usr/local/sbin/.wpsd-slipstream-tasks > /dev/null 2>&1 &
 
     if [ -t 1 ]; then # term. vs. web output...
 	echo -e "${COL_REG_CYAN}+-------------------------------------------+${COL_NC}"
