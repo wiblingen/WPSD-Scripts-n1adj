@@ -44,12 +44,11 @@ if [ ! -d /usr/local/etc/tmp ]; then
     mkdir -p /usr/local/etc/tmp
 fi
 
+curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
+
 rm -rf /usr/local/etc/*.2024*
-rm -rf /usr/local/etc/*csv*
 rm -rf /usr/local/etc/index.*
 rm -rf /usr/local/etc/tmp/*
-
-curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
 
 tar jxf /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -C /usr/local/etc/tmp/
 
