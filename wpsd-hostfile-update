@@ -32,7 +32,7 @@ if ! flock -n 200 ; then
 fi
 
 # connectivity check
-status_code=$(curl -m 6 -A "${ProgVer}  ConnCheck ${uaStr}" --write-out %{http_code} --silent --output /dev/null ${hostFileURL})
+status_code=$(curl -m 6 -L -A "${ProgVer}  ConnCheck ${uaStr}" --write-out %{http_code} --silent --output /tmp/hostfile-checksums ${hostFileURL}/hostfile-checksums)
 if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
     echo "WPSD Hostfile Update Server connection OK...updating hostfiles."
 else
@@ -49,7 +49,6 @@ rm -rf /usr/local/etc/*csv*
 rm -rf /usr/local/etc/index.*
 rm -rf /usr/local/etc/tmp/*
 
-curl --fail -L -o /tmp/hostfile-checksums -s ${hostFileURL}/hostfile-checksums --user-agent "${ProgVer} ${uaStr}"
 curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
 
 tar jxf /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -C /usr/local/etc/tmp/
