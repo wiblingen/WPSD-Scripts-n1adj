@@ -43,10 +43,30 @@ fi
 if [ ! -d /usr/local/etc/tmp ]; then
     mkdir -p /usr/local/etc/tmp
 fi
+
 rm -rf /usr/local/etc/*.2024*
 rm -rf /usr/local/etc/*csv*
 rm -rf /usr/local/etc/index.*
 rm -rf /usr/local/etc/tmp/*
+
+curl --fail -L -o /tmp/hostfile-checksums -s ${hostFileURL}/hostfile-checksums --user-agent "${ProgVer} ${uaStr}"
+curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
+
+tar jxf /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -C /usr/local/etc/tmp/
+
+checksum_file="/tmp/hostfile-checksums"
+base_dir="/usr/local/etc/tmp"
+while IFS=" " read -r expected_checksum filename; do
+    if [[ ! -f "$base_dir/$filename" ]]; then
+        echo "File $filename not found in $base_dir"
+        exit 1
+    fi
+    actual_checksum=$(sha256sum "$base_dir/$filename" | awk '{print $1}')
+    if [[ "$actual_checksum" != "$expected_checksum" ]]; then
+        echo "Checksum mismatch for $filename"
+        exit 1
+    fi
+done < "$checksum_file"
 
 DExtraHOSTS=/usr/local/etc/tmp/DExtra_Hosts.txt
 DMRIDFILE=/usr/local/etc/tmp/DMRIds.dat
@@ -60,11 +80,6 @@ RADIOIDDB_TMP=/usr/local/etc/tmp/user.csv.tmp
 RADIOIDDB=/usr/local/etc/tmp/user.csv
 GROUPSTXT=/usr/local/etc/tmp/groups.txt
 STRIPPED=/usr/local/etc/tmp/stripped.csv
-
-# Generate Host Files
-curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
-
-tar jxf /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -C /usr/local/etc/tmp/
 
 if [ -f /etc/hostfiles.nodextra ]; then
   # Move XRFs to DPlus Protocol
