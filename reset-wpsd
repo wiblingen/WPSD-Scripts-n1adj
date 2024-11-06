@@ -27,6 +27,40 @@ fi
 sudo rm -rf /var/www/dashboard
 sudo env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD webcode reset (client-side) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr}" git clone --depth 1 https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-WebCode.git /var/www/dashboard
 
+# dvmega cast-specific stuff
+castResult=$(isDVmegaCast)
+if [ "$castResult" == "true" ]; then
+    # ensure avrdude conf. is installed for radio/hotspot mgmt.
+    if [ ! -f '/etc/avrdude.conf' ] ; then
+        declare -a CURL_OPTIONS=('-Ls' '-A' "Slipstream-Task (server-side) AVRdude Bootstrap $uaStr")
+        curl "${CURL_OPTIONS[@]}" -o /etc/avrdude.conf https://wpsd-swd.w0chp.net/WPSD-SWD/DVMega-Cast/raw/branch/master/etc/avrdude.conf
+    fi
+    # remove legacy stuff
+    if [ -f '/usr/local/cast/etc/preset.txt' ] ; then
+        rm -f /usr/local/cast/etc/preset.txt
+    fi
+
+    rm -rf /opt/cast
+    env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="DVMega Cast SW Reset ${UaStr}" git clone --depth 1 https://wpsd-swd.w0chp.net/WPSD-SWD/DVMega-Cast.git /opt/cast
+
+    rm -rf /usr/local/cast > /dev/null 2>&1
+    mkdir -p /usr/local/cast/etc > /dev/null 2>&1
+    ln -s /opt/cast/usr-local-cast-bin /usr/local/cast/bin > /dev/null 2>&1
+    ln -s /opt/cast/usr-local-cast-sbin /usr/local/cast/sbin > /dev/null 2>&1
+    ln -s /opt/cast/usr-local-cast-www /var/www/dashboard/admin/cast > /dev/null 2>&1
+    cp -a /opt/cast/usr-local-cast-etc/* /usr/local/cast/etc/ > /dev/null 2>&1
+
+    # ensure configs always have proper perms
+    chmod 775 /usr/local/cast/etc
+    chown -R www-data:pi-star /usr/local/cast/etc
+    chmod 664 /usr/local/cast/etc/*
+
+    # www is a symlink so get main perms setup
+    chmod 775 /opt/cast/usr-local-cast-www
+    chmod 775 /opt/cast/usr-local-cast-www/cast-firmware/fw
+    chown -R www-data:www-data /opt/cast/usr-local-cast-www
+fi
+
 sudo systemctl unmask cron
 sudo systemctl enable cron
 sudo systemctl start cron
