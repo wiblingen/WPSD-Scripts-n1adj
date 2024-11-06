@@ -15,6 +15,9 @@ if [ ! -t 1 ]; then
   exec &> /tmp/WPSD-nightly-tasks.log
 fi
 
+echo -e "\nStopping services..."
+/usr/local/sbin/wpsd-services fullstop > /dev/null 2>&1
+
 pkill .wpsd-running-tasks > /dev/null 2>&1
 pkill .wpsd-slipstream-tasks > /dev/null 2>&1
 
@@ -63,9 +66,6 @@ if grep -q LOGNDROP /etc/iptables.rules; then
 else
     fwState="disabled"
 fi
-
-echo -e "\nStopping services..."
-wpsd-services fullstop > /dev/null 2>&1
 
 # connectivity check
 echo -e "\nChecking connectivity to WPSD update server..."
@@ -124,7 +124,7 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
     echo -e "\nPerforming maint. tasks..."
     # if css does not exist, install default one
     if [ ! -f "/etc/WPSD-css.ini" ] ; then
-	curl -Ls -A "WPSD-SuppFiles (WPSD-Daily-Nightly-Tasks) ${uaStrSF}" $SUPPORTING_FILES_REPO/WPSD-CSS.ini -o /etc/wpsd-css.ini
+	curl -Ls -A "WPSD-SuppFiles (WPSD-Daily-Nightly-Tasks) ${uaStrSF}" "$SUPPORTING_FILES_REPO"/WPSD-CSS.ini -o /etc/wpsd-css.ini
     fi
 
     # setup our own native NextionDriver service...
@@ -208,7 +208,7 @@ fi
 /usr/local/sbin/.wpsd-backend-maint > /dev/null 2>&1
 
 # Generate /etc/motd
-bash /usr/local/sbin/motdgen
+/usr/local/sbin/motdgen
 
 # Purge the logs older than 2 days
 rm -f $(find /var/log/pi-star/ -type f -mtime +1 -print)
@@ -231,12 +231,10 @@ process_log_file > /dev/null 2>&1
 
 # Start all the services...
 echo -e "\nStarting services..."
-wpsd-services start > /dev/null 2>&1
+/usr/local/sbin/wpsd-services start > /dev/null 2>&1
 
 # run any slipstream tasks
 /usr/local/sbin/.wpsd-slipstream-tasks > /dev/null 2>&1
-
-/usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 
 echo -e "\nNightly tasks done!\n"
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# WPSD Running Tasks (managed and ransomized with systemd) - W0CHP 
+# WPSD Running Tasks (managed and randomized with systemd) - W0CHP 
 #
 
 # Make sure we are root
@@ -62,6 +62,6 @@ fi
 /usr/local/sbin/wpsd-hostfile-update &
 
 # Generate /etc/motd
-bash /usr/local/sbin/motdgen
+/usr/local/sbin/motdgen
 
 /usr/local/sbin/.wpsd-slipstream-tasks
