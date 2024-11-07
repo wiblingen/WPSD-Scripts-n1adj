@@ -4,6 +4,8 @@
 # WPSD Nightly Tasks  - W0CHP
 #
 
+set -x
+
 if [ "$(id -u)" != "0" ]; then
   echo -e "You need to be root to run this command...\n"
   exit 1
