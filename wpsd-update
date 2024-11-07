@@ -143,8 +143,11 @@ git_update() {
 	    fi
 	    if [[ ${gitFolder} == "/usr/local/bin" ]]; then
 		# Update the Binaries
+		/usr/local/sbin/wpsd-services fullstop > /dev/null 2>&1
+		process_log_file > /dev/null 2>&1
 		env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-Update (Manual-Update) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git pull -q origin master > /dev/null 2>&1
 		env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-Update (Manual-Update) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git reset --hard origin/master > /dev/null 2>&1
+		/usr/local/sbin/wpsd-services start > /dev/null 2>&1
 	    fi
 	    echo -e "  ${TICK} Updates installed!"
         fi
@@ -189,10 +192,6 @@ perform_update() {
     fi
 
     conn_check
-    echo -e "${BULL} Stopping WPSD Services. Please wait..."
-    wpsd-services fullstop > /dev/null 2>&1
-    process_log_file > /dev/null 2>&1
-    echo -e "  ${TICK} Done!\n"
 
     echo -e "${BULL} Updating WPSD Utilities and Support Programs..."
     git_update /usr/local/sbin
@@ -361,12 +360,7 @@ perform_update() {
 
     /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 
-    echo -e "  ${TICK} Done!" # maint. complete
-
-    echo -e "\n${BULL} Starting WPSD Services. Please wait..."
-    wpsd-services start > /dev/null 2>&1
-    echo -e "  ${TICK} Done!\n"
-
+    echo -e "  ${TICK} Done!\v" # maint. complete
 
     if [ -t 1 ]; then
     # This is running from a terminal, so it should be safe to update the OS
