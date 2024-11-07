@@ -360,7 +360,7 @@ perform_update() {
 
     /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 
-    echo -e "  ${TICK} Done!\v" # maint. complete
+    echo -e "  ${TICK} Done!\n" # maint. complete
 
     if [ -t 1 ]; then
     # This is running from a terminal, so it should be safe to update the OS
