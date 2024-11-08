@@ -63,8 +63,6 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
 
     /usr/local/sbin/.wpsd-slipstream-tasks > /dev/null 2>&1
 
-    systemctl start wpsd-nightly-tasks.timer > /dev/null 2>&1
-    systemctl start wpsd-running-tasks.timer > /dev/null 2>&1
 fi
 
 exit 0
