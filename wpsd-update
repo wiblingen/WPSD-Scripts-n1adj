@@ -180,6 +180,9 @@ perform_update() {
     pkill .wpsd-slipstream-tasks > /dev/null 2>&1
     pkill .wpsd-running-tasks > /dev/null 2>&1
 
+    systemctl stop wpsd-running-tasks.timer > /dev/null 2>&1
+    systemctl stop wpsd-cache.timer > /dev/null 2>&1
+
     if [ -t 1 ] ; then
 	if ! [ $(cat /lib/systemd/system/nginx.service | grep -o "mkdir") ]; then
 	    sed -i '\/PIDFile=\/run\/nginx.pid/a ExecStartPre=\/bin\/mkdir -p \/var\/log\/nginx' /lib/systemd/system/nginx.service
@@ -359,6 +362,9 @@ perform_update() {
     systemctl restart wpsd-running-tasks.service >/dev/null 2>&1
 
     /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
+
+    systemctl start wpsd-running-tasks.timer > /dev/null 2>&1
+    systemctl start wpsd-cache.timer > /dev/null 2>&1
 
     echo -e "  ${TICK} Done!\n" # maint. complete
 
