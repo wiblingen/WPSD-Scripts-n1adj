@@ -6,7 +6,7 @@
 #                                                     #
 #######################################################
 
-ProgVer="WPSD-HostFileUpdater v.3.6"
+ProgVer="WPSD-HostFileUpdater v.3.7"
 
 # Check if we are root
 if [ "$(id -u)" != "0" ];then
@@ -167,6 +167,9 @@ mv /usr/local/etc/tmp/* /usr/local/etc/
 rm -rf ${STRIPPED}
 rm -rf /usr/local/etc/stripped.csv
 ln -s /usr/local/etc/user.csv /usr/local/etc/stripped.csv
+
+rm -rf /usr/local/etc/*2023*
+rm -rf /usr/local/etc/*2024*
 
 touch /var/run/hostfiles-up # create/reset marker
 
