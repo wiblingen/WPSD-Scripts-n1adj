@@ -50,6 +50,7 @@ mv -f /tmp/config_restore/wpsd-upnp-rules /etc/
 mv -f /tmp/config_restore/hostapd.conf /etc/hostapd/
 mv -f /tmp/config_restore/*_paused /etc/
 mv -f /tmp/config_restore/.bm_tgs.json.saved /etc/
+mv -f /tmp/config_restore/etc/.WPSD_config /etc/
 mv -f /tmp/config_restore/pistar-css.ini /etc/wpsd-css.ini
 mv -f /tmp/config_restore/* /etc/ # everything else / All The Things
 
