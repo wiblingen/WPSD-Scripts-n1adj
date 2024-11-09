@@ -15,6 +15,9 @@ if [ ! -t 1 ]; then
   exec &> /tmp/WPSD-nightly-tasks.log
 fi
 
+echo -e "\nStopping services..."
+/usr/local/sbin/wpsd-services fullstop > /dev/null 2>&1
+
 pkill .wpsd-running-tasks > /dev/null 2>&1
 pkill .wpsd-slipstream-tasks > /dev/null 2>&1
 
@@ -98,17 +101,6 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
     echo -e "\nUpdating binaries..."
     # Update the Binaries
     branch="master"
-    WORK_TREE="/usr/local/bin"
-    GIT_DIR="$WORK_TREE/.git"
-    env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=$WORK_TREE --git-dir=$GIT_DIR fetch origin
-    LOCAL=$(git --work-tree=$WORK_TREE --git-dir=$GIT_DIR rev-parse @)
-    REMOTE=$(git --work-tree=$WORK_TREE --git-dir=$GIT_DIR rev-parse @{u})
-    if [ "$LOCAL" != "$REMOTE" ]; then
-	/usr/local/sbin/wpsd-services fullstop
-        env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git  --work-tree=$WORK_TREE --git-dir=$GIT_DIR pull origin "$branch"
-	/usr/local/sbin/wpsd-services start
-    fi
-
     GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=/usr/local/bin --git-dir=/usr/local/bin/.git pull origin "${branch}"
 
     # dvmega cast-specific stuff
@@ -236,6 +228,10 @@ chown -R mmdvm:mmdvm /var/log/pi-star > /dev/null 2>&1
 chmod 775 /var/log/pi-star > /dev/null 2>&1
 
 process_log_file > /dev/null 2>&1
+
+# Start all the services...
+echo -e "\nStarting services..."
+/usr/local/sbin/wpsd-services start > /dev/null 2>&1
 
 # run any slipstream tasks
 /usr/local/sbin/.wpsd-slipstream-tasks > /dev/null 2>&1
