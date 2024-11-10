@@ -251,7 +251,8 @@ if [ "$1" ]; then
 fi
 
 # gpio front/back compat. for pi5 and older Pi SBCs; since Pi5 has its own GPIO chip (gpiochip4 [pinctrl-rp1])
-getGPIOpinMaps=$(ls -al /sys/class/gpio/gpiochip* | sed -n "s/.*gpiochip\([0-9]*\).*/\1/p" | head -n 1)
+getGPIOpinMaps=$(ls -la /sys/class/gpio/gpiochip* | grep "0000.gpio" | sed -n "s/.*gpiochip\([0-9]*\).*/\1/p" | tail -n 1)
+getGPIOpinMaps=${getGPIOpinMaps/504/0}
 pin20=$((getGPIOpinMaps + 20))
 pin21=$((getGPIOpinMaps + 21))
 
@@ -403,8 +404,6 @@ if [ "$1" ] ; then
         gpio write 3 1
     fi
 
-    /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
-
     if [ -t 1 ] && [ "$VERBOSE" != 1 ]; then # term. only
         spinner &
         # Capture the spinner's PID
@@ -476,7 +475,6 @@ if [ "$1" ] ; then
 	    kill $SPINNER_PID &>/dev/null
         fi
         echo -e "    ${CROSS} ${COL_BRIGHT_RED}ERROR:${COL_NC} Modem flashing failed. Modem Connection type not specified.\n"
-        /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
 	systemctl start mmdvmhost.service >/dev/null 2>&1
 	systemctl start mmdvmhost.timer >/dev/null 2>&1
 	systemctl start pistar-watchdog.timer >/dev/null 2>&1
@@ -512,7 +510,6 @@ if [ "$1" ] ; then
 	if $flash_successful; then
   	    # reset the fw version # in the mmdvmhost logs
   	    sed -i '/MMDVM protocol version: 1, description:/d; /MMDVM protocol version: 2, description:/d' /var/log/pi-star/MMDVM-*.log  >/dev/null 2>&1
-    	    /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
 	    /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
   	    # re-nit!
   	    systemctl start mmdvmhost.service >/dev/null 2>&1
@@ -526,7 +523,6 @@ if [ "$1" ] ; then
 	    echo -e "    ${CROSS} ${COL_BRIGHT_RED}ERROR:${COL_NC} Modem flashing failed. The serial port was either busy, or the modem is"
 	    echo -e "               possibly locked from the vendor. You can try running this command again,"
 	    echo -e "               or you can contact the supplier of your modem/hotspot for support.\n"
-    	    /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
 	    systemctl start mmdvmhost.service >/dev/null 2>&1
 	    systemctl start mmdvmhost.timer >/dev/null 2>&1
 	    systemctl start pistar-watchdog.timer >/dev/null 2>&1
@@ -536,7 +532,6 @@ if [ "$1" ] ; then
     else
 	# reset the fw version # in the mmdvmhost logs
   	sed -i '/MMDVM protocol version: 1, description:/d; /MMDVM protocol version: 2, description:/d' /var/log/pi-star/MMDVM-*.log  >/dev/null 2>&1
-    	/usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
 	/usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 	# re-nit!
 	systemctl start mmdvmhost.service >/dev/null 2>&1
@@ -549,10 +544,14 @@ if [ "$1" ] ; then
 
   if [ -t 1 ]; then
       # run via terminal, only output to screen
+      /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
       flash_modem "${1}" "${firmware_file}"
+      /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
     else
       # if not run via terminal, log everything into a log file
+      /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
       flash_modem "${1}" "${firmware_file}" >> /var/log/pi-star/WPSD-modemflash.log 2>&1
+      /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
     fi
 
 fi
