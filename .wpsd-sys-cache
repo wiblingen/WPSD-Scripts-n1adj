@@ -101,7 +101,7 @@ else
 fi
 
 # active net iface
-activeIface=$(route | head -3 | tail -1 | awk '{print $8}')
+activeIface=$(ip route get 1.1.1.1 | grep -Po '(?<=dev\s)\w+' | cut -f1 -d ' ')
 if ! grep -w 'iface' "$TMP_INI_FILE" > /dev/null; then
     sed -i "/Hardware = /a iface = ${activeIface}" "$TMP_INI_FILE"
 else
