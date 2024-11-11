@@ -86,7 +86,7 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
 	/usr/local/sbin/wpsd-system-manager -dfw
     fi
 
-    echo -e "\nUpdating web code..."
+    echo -e "\nUpdating dashboard code..."
     # Update the Dashboard
     # WPSD has more than one branch. So depending on what WPSD Web Code branch the user has installed, check that branch.
     gitFolder="/var/www/dashboard"
@@ -119,7 +119,7 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
     if ! [ -f /root/M17Hosts.txt ]; then
     	echo -e "# Format: Reflector Name IP Port\n# Example:\n# M17-000    81.231.241.25    17000\n\n" > /root/M17Hosts.txt
     fi
-    /usr/local/sbin/wpsd-hostfile-update > /dev/null 2>&1
+    FORCE=1 /usr/local/sbin/wpsd-hostfile-update > /dev/null 2>&1
 
     echo -e "\nPerforming maint. tasks..."
     # if css does not exist, install default one
