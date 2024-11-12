@@ -120,7 +120,7 @@ else
     rm -rf /etc/${1}_paused
   fi
   if [ "${2}" == "Disable" ] && [ ! -f "/etc/${1}_paused" ]; then
-    process_log_file
+    process_log_file > /dev/null 2>&1
     touch /etc/${1}_paused
   fi
   # dvmega cast-specific stuff

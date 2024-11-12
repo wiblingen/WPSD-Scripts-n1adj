@@ -133,12 +133,12 @@ while [[ $# -gt 0 ]]; do
         shift
         ;;
     "-fl" | "--fix-log")
-        process_log_file
+        process_log_file > /dev/null 2>&1
         shift
         ;;
 
     "-pl" | "--purge-logs")
-        purge_log_files
+        purge_log_files > /dev/null 2>&1
         shift
         ;;
 
