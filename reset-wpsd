@@ -69,12 +69,12 @@ sudo rm -rf /etc/WPSD-release ; sudo touch /etc/WPSD-release
 
 sudo wpsd-services start
 
-sudo .wpsd-slipstream-tasks
-sudo .wpsd-sys-cache
+sudo /usr/local/sbin/.wpsd-slipstream-tasks
+sudo /usr/local/sbin/.wpsd-sys-cache
 
 sudo systemctl restart wpsd-nightly-tasks.timer
 sudo systemctl restart wpsd-running-tasks.timer
 sudo systemctl restart wpsd-running-tasks.service
 
-echo "WPSD has been reset."
+echo "WPSD has been reset/reinstalled."
 
