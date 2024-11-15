@@ -59,7 +59,7 @@ if compgen -G "/tmp/Callsign_Name.txt*" > /dev/null; then
 fi
 
 # ensure hostfiles are updated more regularly
-/usr/local/sbin/wpsd-hostfile-update &
+/usr/local/sbin/wpsd-hostfile-update
 
 # Generate /etc/motd
 /usr/local/sbin/motdgen
