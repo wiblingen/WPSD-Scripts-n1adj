@@ -180,12 +180,12 @@ perform_update() {
     pkill .wpsd-slipstream-tasks > /dev/null 2>&1
     pkill .wpsd-running-tasks > /dev/null 2>&1
 
-    systemctl is-active --quiet cron.service && systemctl stop cron.service
-    systemctl is-active --quiet wpsd-running-tasks.timer && systemctl stop wpsd-running-tasks.timer
-    systemctl is-active --quiet wpsd-running-tasks.service && systemctl stop wpsd-running-tasks.service
-    systemctl is-active --quiet wpsd-nightly-tasks.timer && systemctl stop wpsd-nightly-tasks.timer
-    systemctl is-active --quiet wpsd-nightly-tasks.service && systemctl stop wpsd-nightly-tasks.service
-    systemctl is-active --quiet wpsd-cache.timer && systemctl stop wpsd-cache.timer
+    systemctl is-active --quiet cron.service && systemctl stop cron.service > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-running-tasks.timer && systemctl stop wpsd-running-tasks.timer > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-running-tasks.service && systemctl stop wpsd-running-tasks.service > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-nightly-tasks.timer && systemctl stop wpsd-nightly-tasks.timer > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-nightly-tasks.service && systemctl stop wpsd-nightly-tasks.service > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-cache.timer && systemctl stop wpsd-cache.timer > /dev/null 2>&1
 
     if [ -t 1 ] ; then
 	if ! [ $(cat /lib/systemd/system/nginx.service | grep -o "mkdir") ]; then
@@ -367,10 +367,10 @@ perform_update() {
 
     /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 
-    systemctl is-active --quiet cron.service || systemctl start cron.service
-    systemctl is-active --quiet wpsd-running-tasks.timer || systemctl start wpsd-running-tasks.timer
-    systemctl is-active --quiet wpsd-nightly-tasks.timer || systemctl start wpsd-nightly-tasks.timer
-    systemctl is-active --quiet wpsd-cache.timer || systemctl start wpsd-cache.timer
+    systemctl is-active --quiet cron.service || systemctl start cron.service > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-running-tasks.timer || systemctl start wpsd-running-tasks.timer > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-nightly-tasks.timer || systemctl start wpsd-nightly-tasks.timer > /dev/null 2>&1
+    systemctl is-active --quiet wpsd-cache.timer || systemctl start wpsd-cache.timer > /dev/null 2>&1
 
     echo -e "  ${TICK} Done!\n" # maint. complete
 
