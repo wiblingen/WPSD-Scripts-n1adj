@@ -265,10 +265,6 @@ perform_update() {
 	echo ""
     fi
 
-    echo -e "${BULL} Updating Hostfiles, User ID DB's & Talkgroup Lists..."
-    /usr/local/sbin/wpsd-hostfile-update > /dev/null 2>&1
-    echo -e "  ${TICK} Done!\n"
-
     echo -e "${BULL} Performing maintenance tasks..."
 
     # check if user already has firewall disabled, and if so, ensure it's kept that way.
