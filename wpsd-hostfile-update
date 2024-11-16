@@ -21,7 +21,7 @@ if [[ ${FORCE} -ne 1 ]] ; then # please be thoughtful here. This env. var. is ca
     if [  -f '/var/run/hostfiles-up' ] && [ "$(( $(date +"%s") - $(stat -c "%Y" "/var/run/hostfiles-up") ))" -lt "43200" ]; then
 	echo "Hostfles are less than 12 hours old. Not updating."
 	echo "To force an update, run 'sudo FORCE=1 $(basename "$0")'"
-	exit 1
+	exit 0
     fi
 fi
 
