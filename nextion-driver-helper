@@ -31,6 +31,9 @@ if [ "`sed -nr "/^\[General\]/,/^\[/{ :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /et
     if grep -q "^GroupsFile=groups.txt" /etc/mmdvmhost; then
 	sed -i 's/^GroupsFile=groups.txt$/GroupsFile=groupsNextion.txt/' /etc/mmdvmhost
     fi
+    if ! grep -q "^Requires=nextiondriver.service" /lib/systemd/system/mmdvmhost.service; then
+	sed -i '/^After=syslog.target network.target/a Requires=nextiondriver.service' /lib/systemd/system/mmdvmhost.service
+    fi
     systemctl stop nextiondriver.service > /dev/null 2>&1
     /usr/bin/killall NextionDriver > /dev/null 2>&1
     systemctl daemon-reload > /dev/null 2>&1
@@ -52,3 +55,4 @@ else
         systemctl daemon-reload > /dev/null 2>&1
     fi
 fi
+
