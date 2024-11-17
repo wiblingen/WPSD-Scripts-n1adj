@@ -10,7 +10,7 @@ function DisplayRepoStatus() {
 
     case $1 in
 	"/var/www/dashboard")
-	    TARGET="WPSD Digital Voice Dashboard Software"
+	    TARGET="WPSD Dashboard Web Software"
 	    ;;
 	"/usr/local/sbin")
 	    TARGET="WPSD Support Utilites and Programs"
