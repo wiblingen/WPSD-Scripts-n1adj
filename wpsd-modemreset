@@ -63,13 +63,13 @@ if [ -z "${1}" ] || [[ -f "$armbian_env_file" ]] ; then
 fi
 
 if [[ -f "$armbian_env_file" ]] && grep -q "dvmpi" /etc/dstar-radio.mmdvmhost; then
-        gpio mode 3 out
-        gpio mode 4 out
-        gpio write 4 1
-        gpio write 3 0
-        sleep 1
-        gpio write 3 1
-        /usr/local/bin/firmware/utils/stm32flash-0.7 /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 >/dev/null 2>&1
+    gpio mode 3 out
+    gpio mode 4 out
+    gpio write 4 1
+    gpio write 3 0
+    sleep 1
+    gpio write 3 1
+    /usr/local/bin/firmware/utils/stm32flash-0.7 /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 >/dev/null 2>&1
 else
     # gpio front/back compat. for pi5 and older Pi SBCs; since Pi5 has its own GPIO chip (gpiochip4 [pinctrl-rp1])
     getGPIOpinMaps=$(ls -la /sys/class/gpio/gpiochip* | grep "0000.gpio" | sed -n "s/.*gpiochip\([0-9]*\).*/\1/p" | tail -n 1)
@@ -100,6 +100,7 @@ if [ -z "${1}" ] || [[ -f "$armbian_env_file" ]] ; then
   systemctl start mmdvmhost.service
   systemctl start mmdvmhost.timer
   echo -e ${message}
+  exit 0
 fi
 
 exit 0
