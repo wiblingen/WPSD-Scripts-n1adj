@@ -13,6 +13,9 @@ if [ "$(id -u)" != "0" ]; then
   exit 1
 fi
 
+source /usr/local/sbin/.wpsd-common-funcs
+hardware=$(grep -i hardware /etc/WPSD-release | awk -F "= " '{print $2}')
+
 function resetGPIOModem {
     # gpio front/back compat. for pi5 and older Pi SBCs; since Pi5 has its own GPIO chip (gpiochip4 [pinctrl-rp1])
     getGPIOpinMaps=$(ls -la /sys/class/gpio/gpiochip* | grep "0000.gpio" | sed -n "s/.*gpiochip\([0-9]*\).*/\1/p" | tail -n 1)
@@ -42,7 +45,19 @@ if [[ $(/usr/bin/pgrep MMDVMHost) ]]; then
     systemctl stop mmdvmhost > /dev/null 2>&1
     svcRestart=mmdvmhost
 fi
-resetGPIOModem
+
+if [[ ${hardware} == "NanoPi" ]]; then
+    #gpio mode 3 out
+    #gpio mode 4 out
+    #gpio write 4 1
+    #gpio write 3 0
+    #sleep 1
+    #gpio write 3 1
+    #/usr/local/bin/firmware/utils/stm32flash-0.7 /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 >/dev/null 2>&1
+    :
+else
+    resetGPIOModem
+fi
 
 # Random Filename
 randomFilename=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
@@ -82,7 +97,7 @@ function checkMMDVMoutput {
     serialSpeed=$1
     if [[ $(cat /tmp/${randomFilename} | wc -c) -ge 16 ]]; then
         # OK we have some output, clean up the modem version string and remove non-printables
-        modemData=$(tr -cd '[[:print:]]' < /tmp/${randomFilename} | sed 's/^.*MMDVM/MMDVM/g' | sed 's/^.*DVMEGA/DVMEGA/g' | sed 's/^.*D2RG_MMDVM/D2RG_MMDVM/g' | sed 's/^.*ZUMspot/ZUMspot/g' | sed 's/^.*Nano_/Nano_/g' | sed 's/^.*OpenGD77_HS/OpenGD77_HS/g' | sed 's/^.*SkyBridge/SkyBridge/g')
+        modemData=$(tr -cd '[[:print:]]' < /tmp/${randomFilename} | sed 's/^.*MMDVM/MMDVM/g' | sed 's/^.*DVMEGA/DVMEGA/g' | sed 's/^.*D2RG_MMDVM/D2RG_MMDVM/g' | sed 's/^.*ZUMspot/ZUMspot/g' | sed 's/^.*Nano_/Nano_/g' | sed 's/^.*OpenGD77_HS/OpenGD77_HS/g' | sed 's/^.*SkyBridge/SkyBridge/g' |sed 's/^.*EuroNode/EuroNode/g'  )
         protocolVersion=$(xxd -p -l1 -s 3 /tmp/${randomFilename})
 
         # OK we have some output, format it into somthing useful.
@@ -109,6 +124,9 @@ function checkMMDVMoutput {
                 mmdvmClass="MMDVM_HS"
             ;;
             SkyBridge*)
+                mmdvmClass="MMDVM_HS"
+            ;;
+            EuroNode*)
                 mmdvmClass="MMDVM_HS"
             ;;
             DVMEGA*)
@@ -152,7 +170,7 @@ function checkMMDVMoutput {
             ;;
         esac
 
-        if [[ ${modemData} == "MMDVM"* || ${modemData} == "HS_Hat"* || ${modemData} == "D2RG_MMDVM_HS"* || ${modemData} == "ZUMspot"* || ${modemData} == "Nano_"* ]]; then
+        if [[ ${modemData} == "MMDVM"* || ${modemData} == "HS_Hat"* || ${modemData} == "D2RG_MMDVM_HS"* || ${modemData} == "ZUMspot"* || ${modemData} == "Nano_"* || ${modemData} == "SkyBridge"* || ${modemData} == "EuroNode"* ]]; then
             # Print the output
             echo -e "Detected ${mmdvmClass} Port: ${modemDevice} (${mmdvmPort}) Baud: ${serialSpeed} Protocol: ${mmdvmProtocolVer} \n\t Modem Data: ${modemData}\n"
             boardDetected="true"
@@ -198,6 +216,7 @@ function checkDVMEGAoutput {
         echo "" > /tmp/${randomFilename}
     fi
 }
+
 
 function checkNEXTIONoutput {
     serialSpeed=$1
@@ -288,10 +307,21 @@ for modemDevice in $(find /dev/tty* ! -type l | grep -E "tty(AMA|ACM|USB|S)."); 
     rm -rf /tmp/${randomFilename}
 done
 
-# Restart the service(s) if I stopped them
-resetGPIOModem
+# Restart the service(s) if stopped
+if [[ ${hardware} == "NanoPi" ]]; then
+    gpio mode 3 out
+    gpio mode 4 out
+    gpio write 4 1
+    gpio write 3 0
+    sleep 1
+    gpio write 3 1
+    /usr/local/bin/firmware/utils/stm32flash-0.7 /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 >/dev/null 2>&1
+else
+    resetGPIOModem
+fi
 if [[ -v svcRestart ]]; then
     systemctl start ${svcRestart} > /dev/null 2>&1
 fi
 
 exit 0
+

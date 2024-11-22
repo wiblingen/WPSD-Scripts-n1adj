@@ -97,6 +97,7 @@ if [ "$1" ]; then
       firmware_file="euronode_pi_fw.bin"
       MMDVM_HS_GPIO=true
       VERSION=${MMDVM_HS_VERSION}
+      stmVer="0.7"
       ;;
     hs_hat_lonestar-usb)
       firmware_file="lonestar_usb_fw.bin"
@@ -437,11 +438,19 @@ if [ "$1" ] ; then
     elif [ "$MMDVM_HS_GPIO" = true ]; then
 	# Upload the firmware to the modem and place output into buffer for fail/success checking logic
 	if [ "$VERBOSE" = 1 ] ; then
-	    $STM32FLASH -k /dev/ttyAMA0 # try to disable write protection (doesn't always work on some annoying Chinesium locked modems)
-	    $STM32FLASH -v -w /usr/local/bin/firmware/${firmware_file} -g 0x0 -R -i ${pin20},-${pin21},${pin21}:-${pin20},${pin21} /dev/ttyAMA0
+	    if [[ ${hardware} == "NanoPi" ]]; then
+		/usr/local/bin/firmware/utils/stm32flash-${stmVer} -v -w /usr/local/bin/firmware/${firmware_file} /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3
+	    else
+	        $STM32FLASH -k /dev/ttyAMA0 # try to disable write protection (doesn't always work on some annoying Chinesium locked modems)
+	        $STM32FLASH -v -w /usr/local/bin/firmware/${firmware_file} -g 0x0 -R -i ${pin20},-${pin21},${pin21}:-${pin20},${pin21} /dev/ttyAMA0
+	    fi
 	else
-	    $STM32FLASH -k /dev/ttyAMA0 >/dev/null 2>&1 # try to disable write protection (doesn't always work on some annoying Chinesium locked modems)
-	    output=$(eval $STM32FLASH -v -w /usr/local/bin/firmware/${firmware_file} -g 0x0 -R -i ${pin20},-${pin21},${pin21}:-${pin20},${pin21} /dev/ttyAMA0 2>&1)
+	    if [[ ${hardware} == "NanoPi" ]]; then
+		output=$(eval /usr/local/bin/firmware/utils/stm32flash-${stmVer} -v -w /usr/local/bin/firmware/${firmware_file} /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 2>&1)
+	    else
+		$STM32FLASH -k /dev/ttyAMA0 >/dev/null 2>&1 # try to disable write protection (doesn't always work on some annoying Chinesium locked modems)
+		output=$(eval $STM32FLASH -v -w /usr/local/bin/firmware/${firmware_file} -g 0x0 -R -i ${pin20},-${pin21},${pin21}:-${pin20},${pin21} /dev/ttyAMA0 2>&1)
+	    fi
 	fi
     elif [ "$DVMega_GPIO" = true ]; then
         # DV Mega mounted on GPIO
@@ -483,11 +492,6 @@ if [ "$1" ] ; then
         exit 0
     fi
 
-    if [ -t 1 ] && [ "$VERBOSE" != 1 ]; then # term. only
-	# Kill the spinner process (make the cursor visible again)
-	kill $SPINNER_PID &>/dev/null
-    fi
-
     # did we flash successfully?
     if [ "$VERBOSE" != 1 ] ; then
 	flash_successful=false  # Initialize to false
@@ -496,8 +500,14 @@ if [ "$1" ] ; then
 		flash_successful=true
 	    fi
         elif [ "$MMDVM_PI" = true ] || [ "$MMDVM_HS_GPIO" = true ]; then # stm32flash success output
-	    if [[ $output == *"(100.00%) Done"* && $output == *"0x08000000... done"* ]]; then
-		flash_successful=true
+	    if [[ ${hardware} == "NanoPi" ]]; then
+		if [[ $output == *"(100.00%) Done"* && $output == *"0x0800d604"* ]]; then
+		    flash_successful=true
+		fi
+	    else # rpis
+		if [[ $output == *"(100.00%) Done"* && $output == *"0x08000000... done"* ]]; then
+		    flash_successful=true
+		fi
 	    fi
         elif [ "$DVMega_GPIO" = true ] || [ "$DVMega_USB" = true ]; then # avrdude success output
             if [[ $output == *"bytes of flash verified"* ]]; then
@@ -539,6 +549,12 @@ if [ "$1" ] ; then
 	systemctl start pistar-watchdog.timer >/dev/null 2>&1
 	systemctl start pistar-watchdog.service >/dev/null 2>&1
     fi
+
+    if [ -t 1 ] && [ "$VERBOSE" != 1 ]; then # term. only
+	# Kill the spinner process (make the cursor visible again)
+	kill $SPINNER_PID &>/dev/null
+    fi
+
     exit 0
   }
 
