@@ -36,10 +36,7 @@ function status_services() {
 function stop_services()
 {
     echo -ne "Stopping WPSD services..."
-
     systemctl stop nextiondriver-shutdown.service > /dev/null 2>&1
-    sleep 3
-
     if [ "$1" == "FULLSTOP" ]; then
 	    systemctl is-active --quiet cron.service && systemctl stop cron.service
 	    systemctl is-active --quiet wpsd-running-tasks.timer && systemctl stop wpsd-running-tasks.timer
@@ -95,7 +92,7 @@ function start_services()
     castResult=$(isDVmegaCast)
     if [ "$castResult" == "true" ]; then
 	/usr/local/cast/bin/cast-reset > /dev/null 2>&1
-	sleep 2
+	sleep 1
     fi
  
     systemctl start nextiondriver-shutdown.service > /dev/null 2>&1
