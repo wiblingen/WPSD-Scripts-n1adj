@@ -505,7 +505,7 @@ if [ "$1" ] ; then
 	    fi
         elif [ "$MMDVM_PI" = true ] || [ "$MMDVM_HS_GPIO" = true ]; then # stm32flash success output
 	    if [[ ${hardware} == "NanoPi" ]]; then
-		if [[ $output == *"(100.00%) Done"* && $output == *"0x0800d604"* ]]; then
+		if [[ $output == *"(100.00%) Done"* ]] && ([[ $output == *"0x0800d604"* || $output == *"0x0800d608"* ]]); then
 		    flash_successful=true
 		fi
 	    else # rpis
