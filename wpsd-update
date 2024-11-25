@@ -23,6 +23,13 @@ script_name=$(basename "$0")
 
 source /usr/local/sbin/.wpsd-common-funcs
 
+# check if user already has firewall disabled, and if so, ensure it's kept that way.
+if grep -q LOGNDROP /etc/iptables.rules; then
+    fwState="enabled"
+else
+    fwState="disabled"
+fi
+
 # legacy config migration
 legacy_config_php="/var/www/dashboard/config/config.php"
 legacy_language_php="/var/www/dashboard/config/language.php"
@@ -268,10 +275,10 @@ perform_update() {
     echo -e "${BULL} Performing maintenance tasks..."
 
     # check if user already has firewall disabled, and if so, ensure it's kept that way.
-    if ! grep -q LOGNDROP /etc/iptables.rules ; then
-	/usr/local/sbin/wpsd-system-manager -dfw > /dev/null 2>&1
+    if [ "$fwState" == "enabled" ]; then
+        /usr/local/sbin/wpsd-system-manager -efw
     else
-	/usr/local/sbin/wpsd-system-manager -efw > /dev/null 2>&1
+        /usr/local/sbin/wpsd-system-manager -dfw
     fi
 
     /usr/local/sbin/.wpsd-backend-maint > /dev/null 2>&1
