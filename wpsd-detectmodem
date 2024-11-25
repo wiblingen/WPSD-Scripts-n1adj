@@ -47,20 +47,15 @@ if [[ $(/usr/bin/pgrep MMDVMHost) ]]; then
 fi
 
 if [[ ${hardware} == "NanoPi" ]]; then
-    #gpio mode 3 out
-    #gpio mode 4 out
-    #gpio write 4 1
-    #gpio write 3 0
-    #sleep 1
-    #gpio write 3 1
-    #/usr/local/bin/firmware/utils/stm32flash-0.7 /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 >/dev/null 2>&1
-    :
+    : # do nothing until end
 else
-    resetGPIOModem
+    if [ "${1}" != "boot" ]; then
+	resetGPIOModem
+    fi
 fi
 
 # Random Filename
-randomFilename=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+randomFilename=$(openssl rand -base64 20 | tr -dc 'a-zA-Z0-9' | head -n 1)
 
 function readDevice {
     # Setup the variables
@@ -172,15 +167,15 @@ function checkMMDVMoutput {
 
         if [[ ${modemData} == "MMDVM"* || ${modemData} == "HS_Hat"* || ${modemData} == "D2RG_MMDVM_HS"* || ${modemData} == "ZUMspot"* || ${modemData} == "Nano_"* || ${modemData} == "SkyBridge"* || ${modemData} == "EuroNode"* ]]; then
             # Print the output
-            echo -e "Detected ${mmdvmClass} Port: ${modemDevice} (${mmdvmPort}) Baud: ${serialSpeed} Protocol: ${mmdvmProtocolVer} \n\t Modem Data: ${modemData}\n"
+            echo -e "\nDetected ${mmdvmClass} Port: ${modemDevice} (${mmdvmPort}) Baud: ${serialSpeed} Protocol: ${mmdvmProtocolVer} \n\nModem Data: ${modemData}"
             boardDetected="true"
         elif [[ ${modemData} == "DV-MEGA"* || ${modemData} == "DVMEGA"* ]]; then
             # Print the output
-            echo -e "Detected ${mmdvmClass} Port: ${modemDevice} (${mmdvmPort}) Baud: ${serialSpeed} Protocol: ${mmdvmProtocolVer} \n\t Modem Data: ${modemData} - MMDMVM Protocol\n"
+            echo -e "\nDetected ${mmdvmClass} Port: ${modemDevice} (${mmdvmPort}) Baud: ${serialSpeed} Protocol: ${mmdvmProtocolVer} \n\nModem Data: ${modemData} - MMDMVM Protocol"
             boardDetected="true"
         elif [[ ${modemData} == *"u-blox"* ]]; then
             # Print the output
-            echo -e "Detected ${mmdvmClass} Port: ${modemDevice} (${mmdvmPort}) Baud: ${serialSpeed} \n\t Modem Data: u-blox GPS Device\n"
+            echo -e "\nDetected ${mmdvmClass} Port: ${modemDevice} (${mmdvmPort}) Baud: ${serialSpeed} \n\nModem Data: u-blox GPS Device"
             boardDetected="true"
         fi
         echo "" > /tmp/${randomFilename}
@@ -205,12 +200,12 @@ function checkDVMEGAoutput {
 
         if [[ ${dvmegaData} == "DV-MEGA"* || ${dvmegaData} == "DVMEGA"* ]]; then
             # Print the output
-            echo -e "Detected DV-Mega  Port: ${modemDevice} (${dvmegaPort}) Baud: ${serialSpeed} \n\t Modem Data: ${dvmegaData}  - DStarRepeater Protocol\n"
+            echo -e "\nDetected DV-Mega  Port: ${modemDevice} (${dvmegaPort}) Baud: ${serialSpeed} \n\n Modem Data: ${dvmegaData}  - DStarRepeater Protocol\n"
             boardDetected="true"
         fi
         if [[ ${dvmegaData} == *"u-blox"* ]]; then
             # Print the output
-            echo -e "Detected GPS      Port: ${modemDevice} (${dvmegaPort}) Baud: ${serialSpeed} \n\t Modem Data: u-blox GPS Device\n"
+            echo -e "\nDetected GPS      Port: ${modemDevice} (${dvmegaPort}) Baud: ${serialSpeed} \n\n Modem Data: u-blox GPS Device\n"
             boardDetected="true"
         fi
         echo "" > /tmp/${randomFilename}
@@ -247,7 +242,7 @@ function checkNEXTIONoutput {
             fi
 
             # Print the output
-            echo -e "Detected Nextion  Port: ${modemDevice} (${nextionPort}) Baud: ${serialSpeed} \n\t Model: ${nextionModel} Serial: ${nextionSerial} Touch: ${nextionTouch}\n"
+            echo -e "\nDetected Nextion  Port: ${modemDevice} (${nextionPort}) Baud: ${serialSpeed} \n\n Model: ${nextionModel} Serial: ${nextionSerial} Touch: ${nextionTouch}\n"
             boardDetected="true"
         fi
         echo "" > /tmp/${randomFilename}
@@ -307,20 +302,22 @@ for modemDevice in $(find /dev/tty* ! -type l | grep -E "tty(AMA|ACM|USB|S)."); 
     rm -rf /tmp/${randomFilename}
 done
 
-# Restart the service(s) if stopped
-if [[ ${hardware} == "NanoPi" ]]; then
-    gpio mode 3 out
-    gpio mode 4 out
-    gpio write 4 1
-    gpio write 3 0
-    sleep 1
-    gpio write 3 1
-    /usr/local/bin/firmware/utils/stm32flash-0.7 /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 >/dev/null 2>&1
-else
-    resetGPIOModem
-fi
-if [[ -v svcRestart ]]; then
-    systemctl start ${svcRestart} > /dev/null 2>&1
+if [ "${1}" != "boot" ] ; then
+    # Restart the service(s) if stopped
+    if [[ ${hardware} == "NanoPi" ]]; then
+	gpio mode 3 out
+	gpio mode 4 out
+	gpio write 4 1
+	gpio write 3 0
+	sleep 1
+	gpio write 3 1
+	/usr/local/bin/firmware/utils/stm32flash-0.7 /dev/ttyAMA0 -R -i 200,-3,3:-200,-3,3 > /dev/null 2>&1
+    else
+	resetGPIOModem
+    fi
+    if [[ -v svcRestart ]]; then
+	systemctl start ${svcRestart} > /dev/null 2>&1
+    fi
 fi
 
 exit 0

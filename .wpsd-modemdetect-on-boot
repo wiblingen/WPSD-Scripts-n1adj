@@ -1,0 +1,55 @@
+#!/bin/bash
+
+LOG_LINE=$(/home/pi-star/wpsd-detectmodem | tail -1)
+TMP_INI_FILE=/usr/local/etc/.WPSD-release
+
+# Extract the modem name and version directly from the description
+# Handle DVMEGA format
+if [[ "$LOG_LINE" =~ Data:\ (DVMEGA\ ([^ ]+)) ]]; then
+    MODEM_FIRMWARE="DVMEGA-v.${BASH_REMATCH[2]}"
+# Handle MMDVM_MDO ADF7021 with version and date
+elif [[ "$LOG_LINE" =~ Data:\ (MMDVM_MDO)\ ADF7021\ v([0-9.]+)\ ([0-9]{8}) ]]; then
+    MODEM_FIRMWARE="${BASH_REMATCH[1]}-v.${BASH_REMATCH[2]}_${BASH_REMATCH[3]}"
+# Handle MMDVM with version in parentheses
+elif [[ "$LOG_LINE" =~ Data:\ (MMDVM\ ([0-9]+)) ]]; then
+    MODEM_FIRMWARE="MMDVM-v.${BASH_REMATCH[2]}"
+# Handle RB modems
+elif [[ "$LOG_LINE" =~ Data:\ MMDVM\ ([^ ]+)\([0-9]+\)\ ([0-9]{8}) ]]; then
+    MODEM_FIRMWARE="${BASH_REMATCH[1]}-v.${BASH_REMATCH[2]}"
+# Handle OpenGD77_HS and OpenGD77 Hotspot formats
+elif [[ "$LOG_LINE" =~ Data:\ (OpenGD77(_HS| Hotspot))\ v?([0-9.]+) ]]; then
+    MODEM_FIRMWARE="OpenGD77_HS-v.${BASH_REMATCH[3]}"
+# all others (HATs, HS', etc)
+elif [[ "$LOG_LINE" =~ Data:\ ([^ ]+)-v?([0-9.]+) ]]; then
+    MODEM_FIRMWARE="${BASH_REMATCH[1]}-v.${BASH_REMATCH[2]}"
+fi
+
+# Fallback to ModemType if MODEM_FIRMWARE is empty
+if [ -z "$MODEM_FIRMWARE" ]; then
+    MODEM_FIRMWARE="${ModemType}"
+fi
+
+MODEM_TCXO_FREQ=""
+# TCXO frequency
+if [[ "$LOG_LINE" == *"MHz"* ]]; then
+    MODEM_TCXO_FREQ=$(echo "$LOG_LINE" | grep -oP '\d{2,3}\.\d{3,4}\s?MHz')
+    MODEM_TCXO_FREQ=$(echo "$MODEM_TCXO_FREQ" | sed 's/MHz/ MHz/')
+fi
+
+# Fallback if  is empty
+if [ -z "$MODEM_TCXO_FREQ" ]; then
+    MODEM_TCXO_FREQ=""
+fi
+
+# Update the release file
+if ! grep -w 'ModemFW' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" "$TMP_INI_FILE"
+else
+    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" "$TMP_INI_FILE"
+fi
+if ! grep -w 'TCXO' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" "$TMP_INI_FILE"
+else
+    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" "$TMP_INI_FILE"
+fi
+
