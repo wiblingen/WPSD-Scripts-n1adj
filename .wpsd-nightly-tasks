@@ -60,13 +60,6 @@ else
     fi
 fi
 
-# check if user already has firewall disabled, and if so, ensure it's kept that way.
-if grep -q LOGNDROP /etc/iptables.rules; then
-    fwState="enabled"
-else
-    fwState="disabled"
-fi
-
 # connectivity check
 echo -e "\nChecking connectivity to WPSD update server..."
 status_code=$(curl -m 6 -A "ConnCheck (WPSD-Nightly-Tasks) ${uaStr}" --write-out %{http_code} --silent --output /dev/null "${CONN_CHECK_URI}")

@@ -133,3 +133,10 @@ isDVmegaCast() { #obvs
     echo "false"
   fi
 }
+
+# check if user already has firewall disabled, and if so, ensure it's kept that way.
+if grep -q LOGNDROP /etc/iptables.rules; then
+    fwState="enabled"
+else
+    fwState="disabled"
+fi
