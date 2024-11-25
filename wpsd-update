@@ -269,9 +269,9 @@ perform_update() {
 
     # check if user already has firewall disabled, and if so, ensure it's kept that way.
     if [ "$fwState" == "enabled" ]; then
-        /usr/local/sbin/wpsd-system-manager -efw
+        /usr/local/sbin/wpsd-system-manager -efw > /dev/null 2>&1
     else
-        /usr/local/sbin/wpsd-system-manager -dfw
+        /usr/local/sbin/wpsd-system-manager -dfw > /dev/null 2>&1
     fi
 
     /usr/local/sbin/.wpsd-backend-maint > /dev/null 2>&1
