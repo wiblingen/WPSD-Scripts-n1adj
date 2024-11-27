@@ -1,15 +1,38 @@
 #!/bin/bash
 
 get_wireless_interface() {
+    # Find the active wireless interface
     local interface
-    interface=$(iwconfig 2>/dev/null | grep -o '^[a-zA-Z0-9]\+')
+    interface=$(iw dev 2>/dev/null | awk '/Interface/ {print $2}' | head -n 1)
     echo "$interface"
 }
 
-reconnect_wifi() {
-    local interface
-    interface=$(get_wireless_interface)
-    wpa_cli -i"$interface" reconfigure
+is_service_running() {
+    # Check if a service is active
+    local service="$1"
+    systemctl is-active --quiet "$service" && return 0 || return 1
 }
 
-reconnect_wifi
+reload_wifi() {
+    local interface
+    interface=$(get_wireless_interface)
+
+    if [[ -z "$interface" ]]; then
+        echo "No wireless interface found."
+        exit 1
+    fi
+
+    if is_service_running "NetworkManager"; then
+        echo "NetworkManager is managing Wi-Fi. Reloading..."
+        nmcli device reapply "$interface" || nmcli device connect "$interface"
+    elif is_service_running "wpa_supplicant"; then
+        echo "wpa_supplicant is managing Wi-Fi. Reloading..."
+        wpa_cli -i"$interface" reconfigure
+    else
+        echo "Neither NetworkManager nor wpa_supplicant is managing Wi-Fi."
+        exit 1
+    fi
+}
+
+reload_wifi
+
