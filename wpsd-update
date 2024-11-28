@@ -62,19 +62,6 @@ else
     fi
 fi
 
-# connectivity check
-conn_check() {
-    echo -e "\n${BULL} Checking connectivity to the WPSD Update System..."
-    status_code=$(curl -m 30 -A "ConnCheck WPSD-Update (Manual-Update) ${uaStr}" --write-out %{http_code} --silent --output /dev/null "${CONN_CHECK_URI}")
-    sleep 1
-    if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
-	echo -e "  ${COL_BRIGHT_GREEN}${TICK} Connection established!\n"
-    else
-	echo -e "  ${CROSS} ${COL_BRIGHT_RED}ERROR:${COL_NC} Cannot connect to the WPSD Update System. Try again later. Exiting...\n"
-	exit 1
-    fi
-}
-
 git_checkUpdateRequired() {
     # Set the function variables
     gitFolder=${1}
@@ -198,7 +185,13 @@ perform_update() {
 	fi
     fi
 
+    echo -e "\n${BULL} Checking connectivity to the WPSD Update System..."
     conn_check
+    if $connection_established; then
+	echo -e "  ${COL_BRIGHT_GREEN}${TICK} Connection established!\n"
+    else
+	echo -e "  ${CROSS} ${COL_BRIGHT_RED}ERROR:${COL_NC} Cannot connect to the WPSD Update System. Try again later. Exiting...\n"
+    fi
 
     echo -e "${BULL} Updating WPSD Utilities and Support Programs..."
     git_update /usr/local/sbin
@@ -348,12 +341,7 @@ perform_update() {
 	curl -Ls -A "${uaStrSF}" $SUPPORTING_FILES_REPO/WPSD-CSS.ini -o /etc/wpsd-css.ini
     fi
 
-    # Get and cache latest WPSD Web Code version from remote Git repo:
-    gitFolder="/var/www/dashboard"
-    gitRemoteURL=$(git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git config --get remote.origin.url)
-    gitBranch="$( git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD )"
-    gitStatusRemote=$(env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-Update Version Cacher (Manual-Update) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git ls-remote --heads ${gitRemoteURL} ${gitBranch} | grep ${gitBranch} | awk {'print $1'} | awk '{ print substr($1,1,10) }') # last pipe to awk: converts long hash to 10 chars.
-    echo ${gitStatusRemote} > /etc/.WPSD_remote_version
+    conn_check
 
     # log file perms
     chown -R mmdvm:mmdvm /var/log/pi-star > /dev/null 2>&1
