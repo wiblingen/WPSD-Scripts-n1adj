@@ -16,8 +16,8 @@ if [ ! -t 1 ]; then
 fi
 
 # connectivity check
-status_code=$(curl -m 6 -A "ConnCheck (WPSD-First-Boot-Tasks) ${uaStr}" --write-out %{http_code} --silent --output /dev/null "${CONN_CHECK_URI}")
-if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
+conn_check
+if $connection_established; then
 
     wpsd-services fullstop > /dev/null 2>&1
 
@@ -61,6 +61,8 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
     /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 
     wpsd-services start
+else
+    exit 1
 fi
 
 exit 0

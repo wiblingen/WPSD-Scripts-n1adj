@@ -62,9 +62,9 @@ fi
 
 # connectivity check
 echo -e "\nChecking connectivity to WPSD update server..."
-status_code=$(curl -m 6 -A "ConnCheck (WPSD-Nightly-Tasks) ${uaStr}" --write-out %{http_code} --silent --output /dev/null "${CONN_CHECK_URI}")
-if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
-    echo -e "WPSD Update Server connection ok!"
+conn_check
+if $connection_established; then
+    echo -e "  Connection established!\n"
 
     echo -e "\nUpdating sbins..."
     cd /usr/local/sbin
@@ -184,13 +184,7 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
 	    fi
     	fi
     fi
-
-    # Get and cache latest WPSD Web Code version from remote Git repo:
-    gitRemoteURL=$(git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git config --get remote.origin.url)
-    gitBranch="$( git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD )"
-    gitStatusRemote=$(env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck Version Cacher (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git ls-remote --heads ${gitRemoteURL} ${gitBranch} | grep ${gitBranch} | awk {'print $1'} | awk '{ print substr($1,1,10) }') # last pipe to awk: converts long hash to 10 chars.
-    echo ${gitStatusRemote} > /etc/.WPSD_remote_version
-
+    conn_check
 else
     echo "WPSD Update Server connection failure! Will try again during next scheduled job tommorrow."
 fi
