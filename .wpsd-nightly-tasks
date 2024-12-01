@@ -193,7 +193,7 @@ fi
 /usr/local/sbin/.wpsd-backend-maint > /dev/null 2>&1
 
 # Generate /etc/motd
-/usr/local/sbin/motdgen
+/usr/local/sbin/.wpsd-motdgen
 
 # Purge the logs older than 2 days
 rm -f $(find /var/log/pi-star/ -type f -mtime +1 -print)
