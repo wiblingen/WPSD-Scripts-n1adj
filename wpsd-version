@@ -35,7 +35,8 @@ function DisplayRepoStatus() {
 
 function DisplayStatus() {
     clear
-    echo -e -n "${COL_LIGHT_CYAN}${BOLD}"
+    echo -e -n "This is...
+${COL_LIGHT_CYAN}${BOLD}"
 echo ' _      _____  _______ 
 | | /| / / _ \/ __/ _ \
 | |/ |/ / ___/\ \/ // /
