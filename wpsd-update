@@ -90,9 +90,12 @@ git_update() {
     # get proper WPSD dash branch user is running...
     dash_branch="$( git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD )"
 
-    # # get rid of legacy index not that upnp rules are in /etc/wpsd-upnp-rules
+    # get rid of legacy index now that upnp rules are in /etc/wpsd-upnp-rules
+    #if [[ ${gitFolder} == "/usr/local/sbin" ]]; then
+	#git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git update-index --no-assume-unchanged pistar-upnp.service > /dev/null 2>&1
+    #fi
     if [[ ${gitFolder} == "/usr/local/sbin" ]]; then
-	git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git update-index --no-assume-unchanged pistar-upnp.service > /dev/null 2>&1
+	git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git update-index --assume-unchanged pistar-firewall > /dev/null 2>&1
     fi
 
     if [[ $(git_checkUpdateRequired ${gitFolder}) -gt 0 ]]; then

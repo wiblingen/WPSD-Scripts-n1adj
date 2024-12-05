@@ -71,9 +71,11 @@ if $connection_established; then
 
     echo -e "\nUpdating sbins..."
     cd /usr/local/sbin
-    git update-index --no-assume-unchanged pistar-upnp.service # get rid of legacy index not that upnp rules are in /etc/wpsd-upnp-rules
+    #git update-index --no-assume-unchanged pistar-upnp.service # get rid of legacy index not that upnp rules are in /etc/wpsd-upnp-rules
+    git update-index --assume-unchanged pistar-firewall
     git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git reset --hard origin/master
     git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git pull origin master
+    git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git reset --hard origin/master
 
     echo -e "\nResetting firewall back to user prefs..."
     if [ "$fwState" == "enabled" ]; then
