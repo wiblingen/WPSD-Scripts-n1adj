@@ -59,6 +59,7 @@ isDVmegaCast() { #obvs
 }
 
 # connectivity check & version cacher
+# connectivity check & version cacher
 conn_check() {
     connection_established=false
 
@@ -75,7 +76,7 @@ conn_check() {
     fi
 
     ini_file="/etc/.WPSD_remote_version"
-    > "$ini_file"
+    temp_file="$(mktemp)"
 
     for section in "${!repos[@]}"; do
         gitFolder="${repos[$section]}"
@@ -89,11 +90,17 @@ conn_check() {
                 git ls-remote --heads "${gitRemoteURL}" "${gitBranch}" | grep "${gitBranch}" | awk '{print $1}' | awk '{ print substr($1,1,10) }')
 
             if [[ -n "${gitStatusRemote}" ]]; then
-                echo "${section}=${gitStatusRemote}" >> "$ini_file"
+                echo "${section}=${gitStatusRemote}" >> "$temp_file"
                 connection_established=true
             fi
         fi
     done
+
+    if [[ "$connection_established" == "true" ]]; then
+        mv "$temp_file" "$ini_file"
+    else
+        rm -f "$temp_file"
+    fi
 }
 
 # common vars
