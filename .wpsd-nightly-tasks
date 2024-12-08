@@ -201,7 +201,7 @@ fi
 /usr/local/sbin/.wpsd-motdgen
 
 # Purge the logs older than 2 days
-rm -f $(find /var/log/pi-star/ -type f -mtime +1 -print)
+rm -f $(find /var/log/WPSD/ -type f -mtime +1 -print)
 rm -f $(find /var/log/ -type f -mtime +0 -print | grep .gz)
 
 # Shrink nginx error log to stop it getting out of hand
@@ -214,8 +214,8 @@ else
 fi
 
 # log file perms
-chown -R mmdvm:mmdvm /var/log/pi-star > /dev/null 2>&1
-chmod 775 /var/log/pi-star > /dev/null 2>&1
+chown -R mmdvm:mmdvm /var/log/WPSD > /dev/null 2>&1
+chmod 775 /var/log/WPSD > /dev/null 2>&1
 
 process_log_file > /dev/null 2>&1
 

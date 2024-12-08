@@ -350,8 +350,8 @@ perform_update() {
     conn_check
 
     # log file perms
-    chown -R mmdvm:mmdvm /var/log/pi-star > /dev/null 2>&1
-    chmod 775 /var/log/pi-star > /dev/null 2>&1
+    chown -R mmdvm:mmdvm /var/log/WPSD > /dev/null 2>&1
+    chmod 775 /var/log/WPSD > /dev/null 2>&1
 
     systemctl restart wpsd-running-tasks.service >/dev/null 2>&1
 
@@ -412,7 +412,7 @@ if [ -t 1 ]; then
     perform_update "$@"
 else
     # if not run via terminal, log everything into a log file
-     perform_update >> /var/log/pi-star/WPSD-update.log 2>&1
+     perform_update >> /var/log/WPSD/WPSD-update.log 2>&1
 fi
 
 exit 0

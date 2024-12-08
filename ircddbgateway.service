@@ -15,7 +15,7 @@ KILL=/bin/kill
 SLEEP=/bin/sleep
 USER=root
 GROUP=mmdvm
-LOGDIR=/var/log/pi-star
+LOGDIR=/var/log/WPSD
 
 source /usr/local/sbin/.wpsd-common-funcs
 
@@ -56,7 +56,7 @@ case "$1" in
                             sleep 1
                         done
 			# Dump the logs
-			/bin/rm -rf /var/log/pi-star/Links.log
+			/bin/rm -rf /var/log/WPSD/Links.log
 
 			nice -n -5 ${DAEMON_PATH}${DAEMON} ${DAEMON_OPTS}
 			echo -e "$DAEMON started as PID "`$PGREP $DAEMON`

@@ -44,11 +44,11 @@ case ${1} in
     ;;
     pause-xlx)
 	touch /etc/.dmr-xlx_disabled
-	cd /var/log/pi-star ; /usr/local/bin/RemoteCommand 7643 disable xlx > /dev/null 2>&1
+	cd /var/log/WPSD ; /usr/local/bin/RemoteCommand 7643 disable xlx > /dev/null 2>&1
 	echo -e "XLX Network Paused"
     ;;
     resume-xlx)
-	cd /var/log/pi-star ; /usr/local/bin/RemoteCommand 7643 enable xlx > /dev/null 2>&1
+	cd /var/log/WPSD ; /usr/local/bin/RemoteCommand 7643 enable xlx > /dev/null 2>&1
 	rm -rf /etc/.dmr-xlx_disabled
 	echo -e "XLX Network Resumed"
     ;; 

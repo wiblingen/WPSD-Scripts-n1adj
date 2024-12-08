@@ -47,8 +47,8 @@ journalctl --vacuum-size=5M
 (cd /var/lib/php*/sessions/ && rm -f \!\("*"\))
 
 # logfile perms
-chown -R mmdvm:mmdvm /var/log/pi-star
-chmod 775 /var/log/pi-star
+chown -R mmdvm:mmdvm /var/log/WPSD
+chmod 775 /var/log/WPSD
 
 # Keep the Callsign/Name Lookup Temp files in check...helps with page/name lookup perf. (W0CHP - 12/2021)
 if compgen -G "/tmp/Callsign_Name.txt*" > /dev/null; then

@@ -20,7 +20,7 @@ KILL=/bin/kill
 SLEEP=/bin/sleep
 USER=root
 GROUP=mmdvm
-LOGDIR=/var/log/pi-star
+LOGDIR=/var/log/WPSD
 
 # Pre-flight checks...
 test -x ${DAEMON_PATH}${DAEMON} || exit 0

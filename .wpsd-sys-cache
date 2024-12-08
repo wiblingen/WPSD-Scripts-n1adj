@@ -164,8 +164,8 @@ if [ -f '/etc/dstar-radio.mmdvmhost' ]; then
 fi
 
 # modem fw & tcxo
-LOG_MMDVM_NOW="/var/log/pi-star/MMDVM-$(date -u +'%Y-%m-%d').log"
-LOG_MMDVM_PREVIOUS="/var/log/pi-star/MMDVM-$(date -u --date="yesterday" +'%Y-%m-%d').log"
+LOG_MMDVM_NOW="/var/log/WPSD/MMDVM-$(date -u +'%Y-%m-%d').log"
+LOG_MMDVM_PREVIOUS="/var/log/WPSD/MMDVM-$(date -u --date="yesterday" +'%Y-%m-%d').log"
 LOG_SEARCH_STRING="MMDVM protocol version"
 MODEM_FIRMWARE=""
 # Loop until the search string is found in either today's or yesterday's log

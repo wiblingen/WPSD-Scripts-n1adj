@@ -45,6 +45,6 @@ fi
 # Swap "." to " " until MMDVM firmware includes "." support
 message=$(echo "$*" | tr "." " ")
 
-(cd /var/log/pi-star/; ${cmd} ${port} cw ${message^^})
+(cd /var/log/WPSD/; ${cmd} ${port} cw ${message^^})
 
 exit 0

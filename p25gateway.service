@@ -13,7 +13,7 @@ DAEMON_OPTS=$CONFIG
 PGREP=/usr/bin/pgrep
 KILL=/bin/kill
 SLEEP=/bin/sleep
-LOGDIR=/var/log/pi-star
+LOGDIR=/var/log/WPSD
 USER=root
 GROUP=mmdvm
 TGSTATIC=`grep Static= /etc/p25gateway | sed 's/Static=//'`

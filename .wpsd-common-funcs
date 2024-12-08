@@ -160,7 +160,7 @@ interface_get_ip() {
 # "infinite TX status" when the radio really isn't TXing.
 function process_log_file() {
   current_date=$(date -u "+%Y-%m-%d")
-  file_name="/var/log/pi-star/MMDVM-${current_date}.log"
+  file_name="/var/log/WPSD/MMDVM-${current_date}.log"
 
   if [ -e "$file_name" ]; then
     # Find the last line with "received network end of" in the file
@@ -177,7 +177,7 @@ function process_log_file() {
 
 function purge_log_files() { #obvs
     wpsd-services fullstop > /dev/null 2>&1
-    rm -rf /var/log/pi-star/* > /dev/null 2>&1
+    rm -rf /var/log/WPSD/* > /dev/null 2>&1
     wpsd-services start > /dev/null 2>&1
 }
 
