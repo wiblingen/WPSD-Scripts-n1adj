@@ -38,7 +38,7 @@ declare -A repos
 repos=( ["dash"]="/var/www/dashboard" ["bin"]="/usr/local/bin" ["sbin"]="/usr/local/sbin" )
 
 # is cast?
-if [[ $castResult -eq 1 ]]; then
+if [[ $castResult == "true" ]]; then
     repos["cast"]="/opt/cast"
 fi
 
