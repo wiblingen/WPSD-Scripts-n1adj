@@ -68,7 +68,7 @@ for repo_key in "${!repos[@]}"; do
     fi
 done
 if [[ $html_output == true ]]; then
-    echo "<a class=\"lookatme\" lookatme-text=\"Update available!\" href=\"/admin/update.php\">Update available!</a>"
+    echo "&nbsp;<a class=\"lookatme\" lookatme-text=\"Update available!\" href=\"/admin/update.php\">Update available!</a>"
 fi
 
 if ! $update_available; then
