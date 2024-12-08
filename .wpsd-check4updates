@@ -52,20 +52,24 @@ fi
 
 # Check for updates
 update_available=false
+html_output=false
 for repo_key in "${!repos[@]}"; do
     if [[ $(check_update "$repo_key" "${repos[$repo_key]}") -eq 1 ]]; then
         update_available=true
         if [ -t 1 ]; then # running from terminal
             echo "Update available for $repo_key!"
         else
-            echo "<a class=\"lookatme\" lookatme-text=\"Update available!\" href=\"/admin/update.php\">Update available!</a>"
+            html_output=true
         fi
     else
-	if [ -t 1 ]; then
-	    echo "No updates for $repo_key."
-	fi
+        if [ -t 1 ]; then
+            echo "No updates for $repo_key."
+        fi
     fi
 done
+if [[ $html_output == true ]]; then
+    echo "<a class=\"lookatme\" lookatme-text=\"Update available!\" href=\"/admin/update.php\">Update available!</a>"
+fi
 
 if ! $update_available; then
     if [ -t 1 ]; then # running from terminal
