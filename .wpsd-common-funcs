@@ -102,6 +102,7 @@ conn_check() {
     else
         rm -f "$temp_file"
     fi
+    chmod 644 "$ini_file"
 }
 
 # common vars
