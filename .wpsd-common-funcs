@@ -98,6 +98,7 @@ conn_check() {
 
     if [[ "$connection_established" == "true" ]]; then
         mv "$temp_file" "$ini_file"
+	chmod 644 "$ini_file"
     else
         rm -f "$temp_file"
     fi
