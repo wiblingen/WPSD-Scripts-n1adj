@@ -163,6 +163,80 @@ if [ -f '/etc/dstar-radio.mmdvmhost' ]; then
     fi
 fi
 
+# modem fw & tcxo
+LOG_MMDVM_NOW="/var/log/WPSD/MMDVM-$(date -u +'%Y-%m-%d').log"
+LOG_MMDVM_PREVIOUS="/var/log/WPSD/MMDVM-$(date -u --date="yesterday" +'%Y-%m-%d').log"
+LOG_SEARCH_STRING="MMDVM protocol version"
+MODEM_FIRMWARE=""
+# Loop until the search string is found in either today's or yesterday's log
+LOG_LINE=""
+attempts=1
+max_attempts=30
+while [ -z "$LOG_LINE" ] && [ $attempts -lt $max_attempts ]; do
+    LOG_LINE=$(grep "$LOG_SEARCH_STRING" "$LOG_MMDVM_NOW" | tail -1)
+    if [ -z "$LOG_LINE" ]; then
+        LOG_LINE=$(grep "$LOG_SEARCH_STRING" "$LOG_MMDVM_PREVIOUS" | tail -1)
+    fi
+    if [ -z "$LOG_LINE" ]; then
+        sleep 1
+    fi
+
+    if [ $attempts -ge $max_attempts ]; then
+	exit 1 # keep existing one until this runs again with success.
+    fi
+    attempts=$((attempts + 1))
+done
+
+# Extract the modem name and version directly from the description
+# Handle DVMEGA format
+if [[ "$LOG_LINE" =~ description:\ (DVMEGA\ ([^ ]+)) ]]; then
+    MODEM_FIRMWARE="DVMEGA-v.${BASH_REMATCH[2]}"
+# Handle MMDVM_MDO ADF7021 with version and date
+elif [[ "$LOG_LINE" =~ description:\ (MMDVM_MDO)\ ADF7021\ v([0-9.]+)\ ([0-9]{8}) ]]; then
+    MODEM_FIRMWARE="${BASH_REMATCH[1]}-v.${BASH_REMATCH[2]}_${BASH_REMATCH[3]}"
+# Handle MMDVM with version in parentheses
+elif [[ "$LOG_LINE" =~ description:\ (MMDVM\ ([0-9]+)) ]]; then
+    MODEM_FIRMWARE="MMDVM-v.${BASH_REMATCH[2]}"
+# Handle RB modems
+elif [[ "$LOG_LINE" =~ description:\ MMDVM\ ([^ ]+)\([0-9]+\)\ ([0-9]{8}) ]]; then
+    MODEM_FIRMWARE="${BASH_REMATCH[1]}-v.${BASH_REMATCH[2]}"
+# Handle OpenGD77_HS and OpenGD77 Hotspot formats
+elif [[ "$LOG_LINE" =~ description:\ (OpenGD77(_HS| Hotspot))\ v?([0-9.]+) ]]; then
+    MODEM_FIRMWARE="OpenGD77_HS-v.${BASH_REMATCH[3]}"
+# all others (HATs, HS', etc)
+elif [[ "$LOG_LINE" =~ description:\ ([^ ]+)-v?([0-9.]+) ]]; then
+    MODEM_FIRMWARE="${BASH_REMATCH[1]}-v.${BASH_REMATCH[2]}"
+fi
+
+# Fallback to ModemType if MODEM_FIRMWARE is empty
+if [ -z "$MODEM_FIRMWARE" ]; then
+    MODEM_FIRMWARE="${ModemType}"
+fi
+
+MODEM_TCXO_FREQ=""
+# TCXO frequency
+if [[ "$LOG_LINE" == *"MHz"* ]]; then
+    MODEM_TCXO_FREQ=$(echo "$LOG_LINE" | grep -oP '\d{2,3}\.\d{3,4}\s?MHz')
+    MODEM_TCXO_FREQ=$(echo "$MODEM_TCXO_FREQ" | sed 's/MHz/ MHz/')
+fi
+
+# Fallback if  is empty
+if [ -z "$MODEM_TCXO_FREQ" ]; then
+    MODEM_TCXO_FREQ="Updating. Please wait."
+fi
+
+# Update the release file
+if ! grep -w 'ModemFW' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/ModemType = /a ModemFW = ${MODEM_FIRMWARE}" "$TMP_INI_FILE"
+else
+    sed -i "/ModemFW =/c ModemFW = ${MODEM_FIRMWARE}" "$TMP_INI_FILE"
+fi
+if ! grep -w 'TCXO' "$TMP_INI_FILE" > /dev/null; then
+    sed -i "/ModemFW = /a TCXO = ${MODEM_TCXO_FREQ}" "$TMP_INI_FILE"
+else
+    sed -i "/TCXO =/c TCXO = ${MODEM_TCXO_FREQ}" "$TMP_INI_FILE"
+fi
+
 # add / update WPSD version hash to "$TMP_INI_FILE"
 gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
 WPSDver=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )

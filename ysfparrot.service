@@ -9,7 +9,7 @@
 DAEMON=YSFParrot
 DAEMON_PATH=/usr/local/bin/
 DAEMON_OPTS=42012
-LOGDIR=/var/log/pi-star
+LOGDIR=/var/log/WPSD
 PGREP=/usr/bin/pgrep
 KILL=/bin/kill
 SLEEP=/bin/sleep

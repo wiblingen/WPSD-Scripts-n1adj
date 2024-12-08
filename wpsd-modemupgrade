@@ -523,7 +523,7 @@ if [ "$1" ] ; then
     if [ "$VERBOSE" != 1 ] ; then
 	if $flash_successful; then
   	    # reset the fw version # in the mmdvmhost logs
-  	    sed -i '/MMDVM protocol version: 1, description:/d; /MMDVM protocol version: 2, description:/d' /var/log/pi-star/MMDVM-*.log  >/dev/null 2>&1
+  	    sed -i '/MMDVM protocol version: 1, description:/d; /MMDVM protocol version: 2, description:/d' /var/log/WPSD/MMDVM-*.log  >/dev/null 2>&1
 	    /usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
   	    # re-nit!
   	    systemctl start mmdvmhost.service >/dev/null 2>&1
@@ -545,7 +545,7 @@ if [ "$1" ] ; then
 	fi
     else
 	# reset the fw version # in the mmdvmhost logs
-  	sed -i '/MMDVM protocol version: 1, description:/d; /MMDVM protocol version: 2, description:/d' /var/log/pi-star/MMDVM-*.log  >/dev/null 2>&1
+  	sed -i '/MMDVM protocol version: 1, description:/d; /MMDVM protocol version: 2, description:/d' /var/log/WPSD/MMDVM-*.log  >/dev/null 2>&1
 	/usr/local/sbin/.wpsd-sys-cache >/dev/null 2>&1
 	# re-nit!
 	systemctl start mmdvmhost.service >/dev/null 2>&1
@@ -570,7 +570,7 @@ if [ "$1" ] ; then
     else
       # if not run via terminal, log everything into a log file
       /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
-      flash_modem "${1}" "${firmware_file}" >> /var/log/pi-star/WPSD-modemflash.log 2>&1
+      flash_modem "${1}" "${firmware_file}" >> /var/log/WPSD/WPSD-modemflash.log 2>&1
       /usr/local/sbin/wpsd-modemreset boot >/dev/null 2>&1
     fi
 

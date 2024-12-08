@@ -15,7 +15,7 @@ KILL=/bin/kill
 SLEEP=/bin/sleep
 USER=root
 GROUP=mmdvm
-LOGDIR=/var/log/pi-star
+LOGDIR=/var/log/WPSD
 
 source /usr/local/sbin/.wpsd-common-funcs
 

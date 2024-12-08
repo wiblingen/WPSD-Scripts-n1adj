@@ -74,7 +74,7 @@ if [ -t 1 ]; then
   wait
 else
   # if not run via terminal, log everything into a log file
-  main_function ${1} >> /var/log/pi-star/wpsd_icmptest.log 2>&1
+  main_function ${1} >> /var/log/WPSD/wpsd_icmptest.log 2>&1
   wait
 fi
 

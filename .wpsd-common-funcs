@@ -50,22 +50,59 @@ spinner() {
     done
 }
 
-# connectivity check
+isDVmegaCast() { #obvs
+  if [ -d "/opt/cast/.git" ]; then
+    echo "true"
+  else
+    echo "false"
+  fi
+}
+
+# connectivity check & version cacher
+# connectivity check & version cacher
 conn_check() {
     connection_established=false
 
-    gitFolder="/var/www/dashboard"
-    gitRemoteURL=$(git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git config --get remote.origin.url)
-    gitBranch="$(git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD)"
-
-    gitStatusRemote=$(GIT_HTTP_CONNECT_TIMEOUT="10" \
-        GIT_HTTP_USER_AGENT="WPSD Version Cacher/ConnCheck Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]" \
-        git ls-remote --heads ${gitRemoteURL} ${gitBranch} | grep ${gitBranch} | awk '{print $1}' | awk '{ print substr($1,1,10) }')
-
-    if [[ -n ${gitStatusRemote} ]]; then
-        connection_established=true
-        echo ${gitStatusRemote} > /etc/.WPSD_remote_version
+    declare -A repos
+    repos=(
+        [dash]="/var/www/dashboard"
+        [bin]="/usr/local/bin"
+        [sbin]="/usr/local/sbin"
+    )
+    # dvmega cast-specific stuff
+    castResult=$(isDVmegaCast)
+    if [ "$castResult" == "true" ]; then
+        repos[cast]="/opt/cast"
     fi
+
+    ini_file="/etc/.WPSD_remote_version"
+    temp_file="$(mktemp)"
+
+    for section in "${!repos[@]}"; do
+        gitFolder="${repos[$section]}"
+
+        if [[ -d "$gitFolder/.git" ]]; then
+            gitRemoteURL=$(git --work-tree="${gitFolder}" --git-dir="${gitFolder}/.git" config --get remote.origin.url)
+            gitBranch=$(git --git-dir="${gitFolder}/.git" symbolic-ref --short HEAD)
+
+            gitStatusRemote=$(GIT_HTTP_CONNECT_TIMEOUT="10" \
+                GIT_HTTP_USER_AGENT="WPSD Version Cacher/ConnCheck Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]" \
+                git ls-remote --heads "${gitRemoteURL}" "${gitBranch}" | grep "${gitBranch}" | awk '{print $1}' | awk '{ print substr($1,1,10) }')
+
+            if [[ -n "${gitStatusRemote}" ]]; then
+                echo "${section}=${gitStatusRemote}" >> "$temp_file"
+                connection_established=true
+            fi
+        fi
+    done
+
+    if [[ "$connection_established" == "true" ]]; then
+        mv "$temp_file" "$ini_file"
+	chmod 644 "$ini_file"
+    else
+        rm -f "$temp_file"
+    fi
+    chmod 644 "$ini_file"
 }
 
 # common vars
@@ -123,7 +160,7 @@ interface_get_ip() {
 # "infinite TX status" when the radio really isn't TXing.
 function process_log_file() {
   current_date=$(date -u "+%Y-%m-%d")
-  file_name="/var/log/pi-star/MMDVM-${current_date}.log"
+  file_name="/var/log/WPSD/MMDVM-${current_date}.log"
 
   if [ -e "$file_name" ]; then
     # Find the last line with "received network end of" in the file
@@ -140,16 +177,8 @@ function process_log_file() {
 
 function purge_log_files() { #obvs
     wpsd-services fullstop > /dev/null 2>&1
-    rm -rf /var/log/pi-star/* > /dev/null 2>&1
+    rm -rf /var/log/WPSD/* > /dev/null 2>&1
     wpsd-services start > /dev/null 2>&1
-}
-
-isDVmegaCast() { #obvs
-  if [ -d "/opt/cast/.git" ]; then
-    echo "true"
-  else
-    echo "false"
-  fi
 }
 
 # check if user already has firewall disabled, and if so, ensure it's kept that way.

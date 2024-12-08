@@ -28,19 +28,19 @@ while True: #Main loop
 	mmdvmhost = "/etc/dstar-radio.mmdvmhost"
 	utcnow = datetime.datetime.utcnow()
 	datenow = utcnow.strftime('%Y-%m-%d')
-	mmdvmLog = '/var/log/pi-star/MMDVM-' + datenow + '.log'
+	mmdvmLog = '/var/log/WPSD/MMDVM-' + datenow + '.log'
 
 	# Check the disk usage
 	if disk_stat('/var/log') > 90:
 		# Clean up the log volume
 		os.system('rm -rf /var/log/*.1.gz')
 		os.system('rm -rf /var/log/*.1')
-		os.system('rm -f $(find /var/log/pi-star/*.log -type f -mtime +2 -print)')
+		os.system('rm -f $(find /var/log/WPSD/*.log -type f -mtime +2 -print)')
 		os.system('rm -f $(find /var/log/ -type f -mtime +0 -print | grep .gz)')
 		# Shorten the Pi-Star logs
 		if os.path.isfile(mmdvmhost):
 			if os.path.isfile(mmdvmLog):
-				os.system('echo "$(tail -1500 /var/log/pi-star/MMDVM-$(date +%F).log)" > /var/log/pi-star/MMDVM-$(date +%F).log')
+				os.system('echo "$(tail -1500 /var/log/WPSD/MMDVM-$(date +%F).log)" > /var/log/WPSD/MMDVM-$(date +%F).log')
 			os.system('/bin/systemctl restart mmdvmhost.service')
 			time.sleep(60) # Give the service 60 secs before we re-test
 
