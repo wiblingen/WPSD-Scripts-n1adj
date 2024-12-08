@@ -59,6 +59,6 @@ if compgen -G "/tmp/Callsign_Name.txt*" > /dev/null; then
 fi
 
 # Generate /etc/motd
-/usr/local/sbin/motdgen
+/usr/local/sbin/.wpsd-motdgen
 
 /usr/local/sbin/.wpsd-slipstream-tasks

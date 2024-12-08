@@ -50,6 +50,24 @@ spinner() {
     done
 }
 
+# connectivity check
+conn_check() {
+    connection_established=false
+
+    gitFolder="/var/www/dashboard"
+    gitRemoteURL=$(git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git config --get remote.origin.url)
+    gitBranch="$(git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD)"
+
+    gitStatusRemote=$(GIT_HTTP_CONNECT_TIMEOUT="10" \
+        GIT_HTTP_USER_AGENT="WPSD Version Cacher/ConnCheck Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]" \
+        git ls-remote --heads ${gitRemoteURL} ${gitBranch} | grep ${gitBranch} | awk '{print $1}' | awk '{ print substr($1,1,10) }')
+
+    if [[ -n ${gitStatusRemote} ]]; then
+        connection_established=true
+        echo ${gitStatusRemote} > /etc/.WPSD_remote_version
+    fi
+}
+
 # common vars
 osName=$( /usr/bin/lsb_release -cs )
 if [ -f '/etc/WPSD-release' ]; then
@@ -64,8 +82,8 @@ hostFileURL="https://hostfiles.w0chp.net"
 gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
 dashVer=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )
 uuidStr=$(egrep 'UUID' /etc/WPSD-release | awk {'print $3'})
-uaStr="Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]"
-uaStrSF="WPSD-SuppFiles Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]"
+uaStr="Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]"
+uaStrSF="WPSD-SuppFiles Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]"
 armbian_env_file="/boot/armbianEnv.txt"
 rc_local_file="/etc/rc.local"
 

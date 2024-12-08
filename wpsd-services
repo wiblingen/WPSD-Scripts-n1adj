@@ -163,7 +163,8 @@ case "$1" in
 	;;
     
     restart)
-        stop_services
+        stop_services "FULLSTOP"
+    	process_log_file > /dev/null 2>&1
         start_services
         ;;
     

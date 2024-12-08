@@ -6,7 +6,7 @@
 #                                                     #
 #######################################################
 
-ProgVer="WPSD-HostFileUpdater v.4.0"
+ProgVer="WPSD-HostFileUpdater v.4.2"
 
 # Check if we are root
 if [ "$(id -u)" != "0" ];then
@@ -32,8 +32,8 @@ if ! flock -n 200 ; then
 fi
 
 # connectivity check
-status_code=$(curl -m 6 -L -A "${ProgVer}  ConnCheck ${uaStr}" --write-out %{http_code} --silent --output /tmp/hostfile-checksums ${hostFileURL}/hostfile-checksums)
-if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
+conn_check
+if $connection_established; then
     echo "WPSD Hostfile Update Server connection OK...updating hostfiles."
 else
     echo "WPSD Hostfile Update Server connection failed."
@@ -45,6 +45,7 @@ if [ ! -d /usr/local/etc/tmp ]; then
 fi
 rm -rf /usr/local/etc/tmp/hostfile-checksums
 
+curl --fail -L -o /tmp/hostfile-checksums -s ${hostFileURL}/hostfile-checksums --user-agent "${ProgVer} ${uaStr}"
 curl --fail -L -o /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -s ${hostFileURL}/wpsd-hostfiles.tar.bz2 --user-agent "${ProgVer} ${uaStr}"
 
 tar jxf /usr/local/etc/tmp/wpsd-hostfiles.tar.bz2 -C /usr/local/etc/tmp/

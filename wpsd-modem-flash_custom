@@ -58,7 +58,7 @@ then
   else
     # Download STM32F10X_Lib (only for binary tools)
     if [ ! -d "./STM32F10X_Lib/utils" ]; then
-      env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="$UAstr" git clone https://wpsd-swd.w0chp.net/WPSD-SWD/STM32F10X_Lib.git &> /dev/null
+      GIT_HTTP_CONNECT_TIMEOUT="10" GIT_HTTP_USER_AGENT="$UAstr" git clone https://github.com/juribeparada/STM32F10X_Lib.git &> /dev/null
     fi
 
     # Configure vars depending on OS

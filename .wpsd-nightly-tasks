@@ -15,6 +15,9 @@ if [ ! -t 1 ]; then
   exec &> /tmp/WPSD-nightly-tasks.log
 fi
 
+export GIT_HTTP_CONNECT_TIMEOUT="10"
+export GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]"
+
 echo -e "\nStopping services..."
 /usr/local/sbin/wpsd-services fullstop > /dev/null 2>&1
 
@@ -62,15 +65,17 @@ fi
 
 # connectivity check
 echo -e "\nChecking connectivity to WPSD update server..."
-status_code=$(curl -m 6 -A "ConnCheck (WPSD-Nightly-Tasks) ${uaStr}" --write-out %{http_code} --silent --output /dev/null "${CONN_CHECK_URI}")
-if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
-    echo -e "WPSD Update Server connection ok!"
+conn_check
+if $connection_established; then
+    echo -e "  Connection established!\n"
 
     echo -e "\nUpdating sbins..."
     cd /usr/local/sbin
-    git update-index --no-assume-unchanged pistar-upnp.service # get rid of legacy index not that upnp rules are in /etc/wpsd-upnp-rules
-    env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git reset --hard origin/master
-    env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git pull origin master
+    #git update-index --no-assume-unchanged pistar-upnp.service # get rid of legacy index not that upnp rules are in /etc/wpsd-upnp-rules
+    git update-index --assume-unchanged pistar-firewall
+    git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git reset --hard origin/master
+    git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git pull origin master
+    git --work-tree=/usr/local/sbin --git-dir=/usr/local/sbin/.git reset --hard origin/master
 
     echo -e "\nResetting firewall back to user prefs..."
     if [ "$fwState" == "enabled" ]; then
@@ -87,14 +92,14 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
     cd ${gitFolder}
     git stash clear # housekeeping
     git reset --hard origin/master
-    env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git pull origin ${gitBranch}
+    git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git pull origin ${gitBranch}
     git reset --hard origin/master
     git stash clear # housekeeping
 
     echo -e "\nUpdating binaries..."
     # Update the Binaries
     branch="master"
-    GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=/usr/local/bin --git-dir=/usr/local/bin/.git pull origin "${branch}"
+    git --work-tree=/usr/local/bin --git-dir=/usr/local/bin/.git pull origin "${branch}"
 
     # dvmega cast-specific stuff
     castResult=$(isDVmegaCast)
@@ -103,7 +108,7 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
         branch="master"
 	cd /opt/cast
 	git reset --hard origin/master
-	GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git --work-tree=/opt/cast --git-dir=/opt/cast/.git pull origin "${branch}"
+	git --work-tree=/opt/cast --git-dir=/opt/cast/.git pull origin "${branch}"
 	git reset --hard origin/master
     fi
 
@@ -184,13 +189,7 @@ if [[ $status_code == 20* ]] || [[ $status_code == 30* ]] ; then
 	    fi
     	fi
     fi
-
-    # Get and cache latest WPSD Web Code version from remote Git repo:
-    gitRemoteURL=$(git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git config --get remote.origin.url)
-    gitBranch="$( git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD )"
-    gitStatusRemote=$(env GIT_HTTP_CONNECT_TIMEOUT="10" env GIT_HTTP_USER_AGENT="WPSD-UpdateCheck Version Cacher (WPSD-Nightly-Tasks) Ver.# ${dashVer} (${gitBranch}) Call:${CALL} UUID:${uuidStr} [${osName}]" git ls-remote --heads ${gitRemoteURL} ${gitBranch} | grep ${gitBranch} | awk {'print $1'} | awk '{ print substr($1,1,10) }') # last pipe to awk: converts long hash to 10 chars.
-    echo ${gitStatusRemote} > /etc/.WPSD_remote_version
-
+    conn_check
 else
     echo "WPSD Update Server connection failure! Will try again during next scheduled job tommorrow."
 fi
@@ -199,7 +198,7 @@ fi
 /usr/local/sbin/.wpsd-backend-maint > /dev/null 2>&1
 
 # Generate /etc/motd
-/usr/local/sbin/motdgen
+/usr/local/sbin/.wpsd-motdgen
 
 # Purge the logs older than 2 days
 rm -f $(find /var/log/pi-star/ -type f -mtime +1 -print)
