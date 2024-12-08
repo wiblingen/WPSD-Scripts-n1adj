@@ -1,35 +1,74 @@
 #!/bin/bash
 
-gitFolder="/var/www/dashboard"
+# Remote version file
 gitRemoteVer=/etc/.WPSD_remote_version
-# WPSD has more than one branch. So depending on what WPSD branch the user has installed, check that branch.
-gitBranch="$( git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD )"
-gitStatusRemote=$( cat ${gitRemoteVer} )
-gitStatusLocal=$( git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git rev-parse --short=10 ${gitBranch} )
 
-checkDashUpdate() {
-    if [[ ${gitStatusRemote} != ${gitStatusLocal} ]]; then
+# Function to get the remote version for a repo key
+get_remote_version() {
+    local repo_key="$1"
+    grep "^${repo_key}=" "$gitRemoteVer" | cut -d'=' -f2
+}
+
+# Function to get the local version for a repository
+get_local_version() {
+    local gitFolder="$1"
+    local gitBranch
+    gitBranch=$(git --git-dir="${gitFolder}/.git" symbolic-ref --short HEAD)
+    git --work-tree="$gitFolder" --git-dir="${gitFolder}/.git" rev-parse --short=10 "$gitBranch"
+}
+
+# Function to check for an update
+check_update() {
+    local repo_key="$1"
+    local gitFolder="$2"
+    local remote_version
+    local local_version
+    remote_version=$(get_remote_version "$repo_key")
+    local_version=$(get_local_version "$gitFolder")
+
+    if [ "$remote_version" != "$local_version" ]; then
         echo "1"
     else
         echo "0"
     fi
 }
 
-FILESIZE=$( stat -c%s ${gitRemoteVer} )
-if [[ $FILESIZE -lt 5 ]]; then
-    exit "1"
-else
-    if [[ $(checkDashUpdate ${gitFolder}) -gt 0 ]]; then
-        if [ -t 1 ]; then # running from term?
-            echo -e "WPSD Update Available!"
-        else # text for dashboard:
-            echo ' <a class="lookatme" lookatme-text="Update available!" href="/admin/update.php">Update available!</a>'
+# Define repositories
+declare -A repos
+repos=( ["dash"]="/var/www/dashboard" ["bin"]="/usr/local/bin" ["sbin"]="/usr/local/sbin" )
+
+# is cast?
+if [[ $castResult -eq 1 ]]; then
+    repos["cast"]="/opt/cast"
+fi
+
+# Ensure the remote version file is valid
+if [[ ! -s "$gitRemoteVer" ]]; then
+    exit 1
+fi
+
+# Check for updates
+update_available=false
+for repo_key in "${!repos[@]}"; do
+    if [[ $(check_update "$repo_key" "${repos[$repo_key]}") -eq 1 ]]; then
+        update_available=true
+        if [ -t 1 ]; then # running from terminal
+            echo "Update available for $repo_key!"
+        else
+            echo "<a class=\"lookatme\" lookatme-text=\"Update available!\" href=\"/admin/update.php\">Update available!</a>"
         fi
-else
-        if [ -t 1 ]; then # running from term?
-            echo -e "WPSD is Up-to-Date."
-        fi
+    else
+	if [ -t 1 ]; then
+	    echo "No updates for $repo_key."
+	fi
+    fi
+done
+
+if ! $update_available; then
+    if [ -t 1 ]; then # running from terminal
+        echo "All repositories are up-to-date."
     fi
 fi
+
 exit 0
 
