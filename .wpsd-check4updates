@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /usr/local/sbin/.wpsd-common-funcs
+
 # Remote version file
 gitRemoteVer=/etc/.WPSD_remote_version
 
