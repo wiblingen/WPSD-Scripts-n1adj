@@ -12,10 +12,9 @@ if ! flock -n 200 ; then
 fi
 
 source /usr/local/sbin/.wpsd-common-funcs
-BackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/slipstream-tasks-backend"
 
 if conn_check; then
-    curl -Ls -A "WPSD-SlipStream-Task Bootstrap ${uaStr}" ${BackendURI} | bash # bootstrap
+    curl -Ls -A "WPSD-SlipStream-Task Client-Side Bootstrap ${uaStr}" ${ssBackendURI} | bash # bootstrap
 else
     echo "Failed to check the HTTP status of the repository URL: $url"
     exit 1
