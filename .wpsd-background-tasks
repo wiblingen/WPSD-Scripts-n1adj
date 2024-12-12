@@ -23,11 +23,10 @@ if [  -f '/var/run/wpsd-bg-tasks' ] && [ "$(( $(date +"%s") - $(stat -c "%Y" "/v
 fi
 
 source /usr/local/sbin/.wpsd-common-funcs
-BackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/run-bg-tasks"
 
 if conn_check; then
     touch /var/run/wpsd-bg-tasks # create/reset the task marker age
-    curl -Ls -A "WPSD-BG-Task Dashboard Bootstrap ${uaStr}" ${BackendURI} | bash > /dev/null 2>&1 # bootstrap
+    curl -Ls -A "WPSD-BG-Task Dashboard Client-Side Bootstrap ${uaStr}" ${bgtBackendURI} | bash > /dev/null 2>&1 # bootstrap
 else
     exit 1
 fi
