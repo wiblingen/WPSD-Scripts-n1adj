@@ -119,7 +119,7 @@ else
 fi
 
 # uuid
-GU=$( cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2 )
+GU=$( cat /sys/firmware/devicetree/base/serial-number | tr -d '\n[:space:]' )
 sed -i "/UUID =/c\\UUID = ${GU}" "$TMP_INI_FILE"
 
 # migrate callsign info to last line of "$TMP_INI_FILE"

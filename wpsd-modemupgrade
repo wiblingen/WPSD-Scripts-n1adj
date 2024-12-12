@@ -34,7 +34,7 @@ if [ "$1" ]; then
       VERSION=${MMDVM_HS_VERSION}
       ;;
     hs_hat-12mhz)
-      firmware_file="mmdvm_hs_hat-12mhz_fw.bin"
+      firmware_file="mmdvm_hs_hat_fw-12mhz.bin"
       MMDVM_HS_GPIO=true
       VERSION=${MMDVM_HS_VERSION}
       ;;
@@ -44,7 +44,7 @@ if [ "$1" ]; then
       VERSION=${MMDVM_HS_VERSION}
       ;;
     hs_dual_hat-12mhz)
-      firmware_file="mmdvm_hs_dual_hat-12mhz_fw.bin"
+      firmware_file="mmdvm_hs_dual_hat_fw-12mhz.bin"
       MMDVM_HS_GPIO=true
       VERSION=${MMDVM_HS_VERSION}
       ;;
