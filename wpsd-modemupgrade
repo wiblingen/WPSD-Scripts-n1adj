@@ -401,7 +401,7 @@ if [ "$1" ] ; then
         # Capture the spinner's PID
         SPINNER_PID=$!
     else
-	echo -e "\n    ${NOTE}  Flashing modem - please wait..."
+	echo -e "    ${NOTE}  Flashing modem - please wait..."
     fi
 
     DFU_RST="/usr/local/bin/firmware/utils/upload-reset"
