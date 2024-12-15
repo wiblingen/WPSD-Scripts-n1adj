@@ -162,26 +162,32 @@ if [ "$1" ]; then
       stmVer="0.7"
       VERSION=${RPT_VERSION}
       ;;
-    rpt_mmdvm_hat-0.2)
+    rpt_mmdvm_hat-v0.2)
       firmware_file="MMDVM_RPT_Hat_0.2.bin"
       MMDVM_PI=true
       stmVer="0.7"
       VERSION=${RPT_VERSION}
       ;;
-    rpt_mmdvm_hat-0.3)
+    rpt_mmdvm_hat-v0.3)
       firmware_file="MMDVM_RPT_Hat_0.3.bin"
       MMDVM_PI=true
       stmVer="0.7"
       VERSION=${RPT_VERSION}
       ;;
-    rpt_zum-0.9)
+    rpt_zum-v0.9)
       firmware_file="ZUM_MMDVM-Pi_0.9.bin"
       MMDVM_PI=true
       stmVer="0.7"
       VERSION=${RPT_VERSION}
       ;;
-    rpt_zum-1.0)
-      firmware_file="ZUM_MMDVM-Pi_1.0.bin"
+    rpt_zum-v1.0-F4)
+      firmware_file="ZUM_MMDVM-Pi_1.0-F4.bin"
+      MMDVM_PI=true
+      stmVer="0.7"
+      VERSION=${RPT_VERSION}
+      ;;
+    rpt_zum-v1.0-F7)
+      firmware_file="ZUM_MMDVM-Pi_1.0-F7.bin"
       MMDVM_PI=true
       stmVer="0.7"
       VERSION=${RPT_VERSION}
@@ -234,10 +240,11 @@ if [ "$1" ]; then
       echo "dvmega_usb_mega"
       echo "rpt_nucleo-64"
       echo "rpt_nucleo-144"
-      echo "rpt_mmdvm_hat-0.2"
-      echo "rpt_mmdvm_hat-0.3"
-      echo "rpt_zum-0.9"
-      echo "rpt_zum-1.0"
+      echo "rpt_mmdvm_hat-v0.2"
+      echo "rpt_mmdvm_hat-v0.3"
+      echo "rpt_zum-v0.9"
+      echo "rpt_zum-v1.0-F4"
+      echo "rpt_zum-v1.0-F7"
       echo "rpt_builder_v3"
       echo "rpt_builder_v4"
       echo "rpt_builder_v5"
@@ -305,10 +312,11 @@ then
   echo ""
   echo "  Repeater - Nucleo64 F446RE GPIO:			wpsd-modemupgrade rpt_nucleo-64"
   echo "  Repeater - Nucleo144 F767ZI GPIO:			wpsd-modemupgrade rpt_nucleo-144"
-  echo "  Repeater - MMDVM_RPT_Hat 0.2 GPIO:			wpsd-modemupgrade rpt_mmdvm_hat-0.2"
-  echo "  Repeater - MMDVM_RPT_Hat 0.3 GPIO:			wpsd-modemupgrade rpt_mmdvm_hat-0.3"
-  echo "  Repeater - ZUM Radio MMDVM for Pi v0.9 GPIO:		wpsd-modemupgrade rpt_zum-0.9"
-  echo "  Repeater - ZUM Radio MMDVM for Pi v1.0 GPIO:		wpsd-modemupgrade rpt_zum-1.0"
+  echo "  Repeater - MMDVM_RPT_Hat 0.2 GPIO:			wpsd-modemupgrade rpt_mmdvm_hat-v0.2"
+  echo "  Repeater - MMDVM_RPT_Hat 0.3 GPIO:			wpsd-modemupgrade rpt_mmdvm_hat-v0.3"
+  echo "  Repeater - ZUM Radio MMDVM for Pi v0.9 GPIO:		wpsd-modemupgrade rpt_zum-v0.9"
+  echo "  Repeater - ZUM Radio MMDVM for Pi v1.0 (F4) GPIO:	wpsd-modemupgrade rpt_zum-v1.0-F4"
+  echo "  Repeater - ZUM Radio MMDVM for Pi v1.0 (F7) GPIO:	wpsd-modemupgrade rpt_zum-v1.0-F7"
   echo "  Repeater - Repeater Builder STM32_DVM v3 GPIO:	wpsd-modemupgrade rpt_builder_v3"
   echo "  Repeater - Repeater Builder STM32_DVM v4 GPIO:	wpsd-modemupgrade rpt_builder_v4"
   echo "  Repeater - Repeater Builder STM32_DVM v5 GPIO:	wpsd-modemupgrade rpt_builder_v5"
