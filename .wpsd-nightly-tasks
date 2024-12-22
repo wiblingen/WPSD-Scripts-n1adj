@@ -205,7 +205,7 @@ rm -f $(find /var/log/WPSD/ -type f -mtime +1 -print)
 rm -f $(find /var/log/ -type f -mtime +0 -print | grep .gz)
 
 # Shrink nginx error log to stop it getting out of hand
-echo "$(tail -500 /var/log/nginx/error.log)" > /var/log/nginx/error.log
+#echo "$(tail -500 /var/log/nginx/error.log)" > /var/log/nginx/error.log
 debian_version=$(lsb_release -rs | cut -d. -f1)
 if [ "$debian_version" -lt 12 ]; then
     echo "$(tail -500 /var/log/php7.4-fpm.log)" > /var/log/php7.4-fpm.log
