@@ -197,6 +197,7 @@ perform_update() {
 	echo -e "  ${COL_BRIGHT_GREEN}${TICK} Connection established!\n"
     else
 	echo -e "  ${CROSS} ${COL_BRIGHT_RED}ERROR:${COL_NC} Cannot connect to the WPSD Update System. Try again later. Exiting...\n"
+	exit 1
     fi
 
     echo -e "${BULL} Updating WPSD Utilities and Support Programs..."
