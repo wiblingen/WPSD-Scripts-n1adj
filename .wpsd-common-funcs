@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# common vars
+osName=$( /usr/bin/lsb_release -cs )
+if [ -f '/etc/WPSD-release' ]; then
+    CALL=$( grep "^Callsign = " /etc/WPSD-release | awk -F' = ' '{print $2}' )
+else
+    CALL=$( grep "^Callsign = " /etc/pistar-release | awk -F' = ' '{print $2}' )
+fi
+OS_VER=$( cat /etc/debian_version | sed 's/\..*//')
+SUPPORTING_FILES_REPO="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/supporting-files"
+ssBackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/slipstream-tasks-backend"
+bgtBackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/run-bg-tasks"
+hostFileURL="https://hostfiles.w0chp.net"
+gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
+dashVer=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )
+uuidStr=$(egrep 'UUID' /etc/WPSD-release | awk {'print $3'})
+uaStr="Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]"
+uaStrSF="WPSD-SuppFiles Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]"
+armbian_env_file="/boot/armbianEnv.txt"
+rc_local_file="/etc/rc.local"
+
 # Pretty term stuffs ;-)
 if [ -t 1 ] || [ -n "$PS1" ] || [ -n "$FORCE_COLOR" ] ; then # terminal and bash call only...
     COL_NC='\e[0m' # No Color
@@ -59,72 +79,24 @@ isDVmegaCast() { #obvs
 }
 
 # connectivity check & version cacher
-# connectivity check & version cacher
 conn_check() {
+    ProgVer="WPSD-HostFileUpdater v4.x ConnectivityCheck & Version Cacher"
     connection_established=false
 
-    declare -A repos
-    repos=(
-        [dash]="/var/www/dashboard"
-        [bin]="/usr/local/bin"
-        [sbin]="/usr/local/sbin"
-    )
-    # dvmega cast-specific stuff
-    castResult=$(isDVmegaCast)
-    if [ "$castResult" == "true" ]; then
-        repos[cast]="/opt/cast"
-    fi
-
+    # Remote version file URL
+    remote_version_url="${hostFileURL}/.WPSD_remote_version"
     ini_file="/etc/.WPSD_remote_version"
     temp_file="$(mktemp)"
 
-    for section in "${!repos[@]}"; do
-        gitFolder="${repos[$section]}"
-
-        if [[ -d "$gitFolder/.git" ]]; then
-            gitRemoteURL=$(git --work-tree="${gitFolder}" --git-dir="${gitFolder}/.git" config --get remote.origin.url)
-            gitBranch=$(git --git-dir="${gitFolder}/.git" symbolic-ref --short HEAD)
-
-            gitStatusRemote=$(GIT_HTTP_CONNECT_TIMEOUT="10" \
-                GIT_HTTP_USER_AGENT="WPSD Version Cacher/ConnCheck Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]" \
-                git ls-remote --heads "${gitRemoteURL}" "${gitBranch}" | grep "${gitBranch}" | awk '{print $1}' | awk '{ print substr($1,1,10) }')
-
-            if [[ -n "${gitStatusRemote}" ]]; then
-                echo "${section}=${gitStatusRemote}" >> "$temp_file"
-                connection_established=true
-            fi
-        fi
-    done
-
-    if [[ "$connection_established" == "true" ]]; then
+    # Fetch the remote version file
+    if curl --silent --fail --output "$temp_file" -A "${ProgVer} ${uaStr}" "$remote_version_url"; then
+        connection_established=true
         mv "$temp_file" "$ini_file"
-	chmod 644 "$ini_file"
+        chmod 644 "$ini_file"
     else
         rm -f "$temp_file"
     fi
-    chmod 644 "$ini_file"
 }
-
-# common vars
-osName=$( /usr/bin/lsb_release -cs )
-if [ -f '/etc/WPSD-release' ]; then
-    CALL=$( grep "^Callsign = " /etc/WPSD-release | awk -F' = ' '{print $2}' )
-else
-    CALL=$( grep "^Callsign = " /etc/pistar-release | awk -F' = ' '{print $2}' )
-fi
-OS_VER=$( cat /etc/debian_version | sed 's/\..*//')
-SUPPORTING_FILES_REPO="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/supporting-files"
-CONN_CHECK_URI="https://wpsd-swd.w0chp.net/api/v1/repos/WPSD-SWD/WPSD-Scripts/branches"
-ssBackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/slipstream-tasks-backend"
-bgtBackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/run-bg-tasks"
-hostFileURL="https://hostfiles.w0chp.net"
-gitBranch=$(git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git symbolic-ref --short HEAD)
-dashVer=$( git --work-tree=/var/www/dashboard --git-dir=/var/www/dashboard/.git rev-parse --short=10 ${gitBranch} )
-uuidStr=$(egrep 'UUID' /etc/WPSD-release | awk {'print $3'})
-uaStr="Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]"
-uaStrSF="WPSD-SuppFiles Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]"
-armbian_env_file="/boot/armbianEnv.txt"
-rc_local_file="/etc/rc.local"
 
 # Function to check if any network interface has an IP address
 interface_has_ip() {
@@ -189,3 +161,4 @@ if grep -q LOGNDROP /etc/iptables.rules; then
 else
     fwState="disabled"
 fi
+

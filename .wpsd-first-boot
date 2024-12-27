@@ -50,11 +50,7 @@ if $connection_established; then
 	git reset --hard origin/master
     fi
 
-    # Get and cache latest WPSD Web Code version from remote Git repo:
-    gitRemoteURL=$(git --work-tree=${gitFolder} --git-dir=${gitFolder}/.git config --get remote.origin.url)
-    gitBranch="$( git --git-dir=${gitFolder}/.git symbolic-ref --short HEAD )"
-    gitStatusRemote=$(GIT_HTTP_CONNECT_TIMEOUT="10" GIT_HTTP_USER_AGENT="WPSD-UpdateCheck Version Cacher (WPSD-First-Boot-Tasks) Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]" git ls-remote --heads ${gitRemoteURL} ${gitBranch} | grep ${gitBranch} | awk {'print $1'} | awk '{ print substr($1,1,10) }') # last pipe to awk: converts long hash to 10 chars.
-    echo ${gitStatusRemote} > /etc/.WPSD_remote_version
+    conn_check
 
     touch /boot/.WPSD_Booted
 
