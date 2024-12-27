@@ -2,13 +2,13 @@
 
 source /usr/local/sbin/.wpsd-common-funcs
 
-# Remote version file
-gitRemoteVer=/etc/.WPSD_remote_version
+# Local cache for the remote version file
+gitRemoteVerCache="/etc/.WPSD_remote_version"
 
 # Function to get the remote version for a repo key
 get_remote_version() {
     local repo_key="$1"
-    grep "^${repo_key}=" "$gitRemoteVer" | cut -d'=' -f2
+    grep "^${repo_key}=" "$gitRemoteVerCache" | cut -d'=' -f2
 }
 
 # Function to get the local version for a repository
@@ -37,16 +37,16 @@ check_update() {
 
 # Define repositories
 declare -A repos
-repos=( ["dash"]="/var/www/dashboard" ["bin"]="/usr/local/bin" ["sbin"]="/usr/local/sbin" )
+repos=( ["WPSD-Scripts"]="/usr/local/sbin" ["WPSD-Binaries"]="/usr/local/bin" ["WPSD-WebCode"]="/var/www/dashboard" )
 
-# is cast?
+# Check if the system is a DVmega-Cast device
 castResult=$(isDVmegaCast)
 if [[ $castResult == "true" ]]; then
-    repos["cast"]="/opt/cast"
+    repos["DVMega-Cast"]="/opt/cast"
 fi
 
-# Ensure the remote version file is valid
-if [[ ! -s "$gitRemoteVer" ]]; then
+# Validate the presence of the remote version file
+if [[ ! -s "$gitRemoteVerCache" ]]; then
     exit 1
 fi
 
