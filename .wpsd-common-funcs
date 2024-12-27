@@ -9,7 +9,6 @@ else
 fi
 OS_VER=$( cat /etc/debian_version | sed 's/\..*//')
 SUPPORTING_FILES_REPO="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/supporting-files"
-CONN_CHECK_URI="https://wpsd-swd.w0chp.net/api/v1/repos/WPSD-SWD/WPSD-Scripts/branches"
 ssBackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/slipstream-tasks-backend"
 bgtBackendURI="https://wpsd-swd.w0chp.net/WPSD-SWD/WPSD-Helpers/raw/branch/master/bg-tasks/run-bg-tasks"
 hostFileURL="https://hostfiles.w0chp.net"
@@ -81,48 +80,22 @@ isDVmegaCast() { #obvs
 
 # connectivity check & version cacher
 conn_check() {
+    ProgVer="WPSD-HostFileUpdater v4.x ConnectivityCheck & Version Cacher"
     connection_established=false
 
-    declare -A repos
-    repos=(
-        [dash]="/var/www/dashboard"
-        [bin]="/usr/local/bin"
-        [sbin]="/usr/local/sbin"
-    )
-    # dvmega cast-specific stuff
-    castResult=$(isDVmegaCast)
-    if [ "$castResult" == "true" ]; then
-        repos[cast]="/opt/cast"
-    fi
-
+    # Remote version file URL
+    remote_version_url="https://hostfiles.w0chp.net/.WPSD_remote_version"
     ini_file="/etc/.WPSD_remote_version"
     temp_file="$(mktemp)"
 
-    for section in "${!repos[@]}"; do
-        gitFolder="${repos[$section]}"
-
-        if [[ -d "$gitFolder/.git" ]]; then
-            gitRemoteURL=$(git --work-tree="${gitFolder}" --git-dir="${gitFolder}/.git" config --get remote.origin.url)
-            gitBranch=$(git --git-dir="${gitFolder}/.git" symbolic-ref --short HEAD)
-
-            gitStatusRemote=$(GIT_HTTP_CONNECT_TIMEOUT="10" \
-                GIT_HTTP_USER_AGENT="WPSD Version Cacher/ConnCheck Ver.# ${dashVer} Call:${CALL} UUID:${uuidStr} [${osName}]" \
-                git ls-remote --heads "${gitRemoteURL}" "${gitBranch}" | grep "${gitBranch}" | awk '{print $1}' | awk '{ print substr($1,1,10) }')
-
-            if [[ -n "${gitStatusRemote}" ]]; then
-                echo "${section}=${gitStatusRemote}" >> "$temp_file"
-                connection_established=true
-            fi
-        fi
-    done
-
-    if [[ "$connection_established" == "true" ]]; then
+    # Fetch the remote version file
+    if curl --silent --fail --output  --user-agent "${ProgVer} ${uaStr}" "$temp_file" "$remote_version_url"; then
+        connection_established=true
         mv "$temp_file" "$ini_file"
-	chmod 644 "$ini_file"
+        chmod 644 "$ini_file"
     else
         rm -f "$temp_file"
     fi
-    chmod 644 "$ini_file"
 }
 
 # Function to check if any network interface has an IP address
